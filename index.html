@@ -405,6 +405,61 @@
   }
   .del-item:hover { color: var(--pink); }
 
+  .act-btn.speak-btn {
+    background: rgba(167,139,250,0.12);
+    border: 1.5px solid rgba(167,139,250,0.4);
+    color: var(--violet);
+    font-weight: 600;
+    padding: 11px 26px;
+    font-size: 0.88rem;
+    box-shadow: 0 0 16px rgba(167,139,250,0.08);
+  }
+  .act-btn.speak-btn:hover {
+    background: rgba(167,139,250,0.22);
+    border-color: rgba(167,139,250,0.7);
+    box-shadow: 0 0 24px rgba(167,139,250,0.2);
+    transform: translateY(-1px);
+  }
+  .act-btn.speak-btn.speaking {
+    background: rgba(167,139,250,0.25);
+    border-color: var(--violet);
+    animation: pulse-speak 1.5s infinite;
+  }
+  @keyframes pulse-speak {
+    0%, 100% { box-shadow: 0 0 16px rgba(167,139,250,0.2); }
+    50% { box-shadow: 0 0 32px rgba(167,139,250,0.5); }
+  }
+
+  .voice-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+  }
+  .voice-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  .voice-select {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    color: var(--muted);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.85rem;
+    padding: 7px 12px;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    max-width: 240px;
+  }
+  .voice-select:focus { border-color: rgba(167,139,250,0.5); color: var(--text); }
+
   .divider {
     height: 1px;
     background: var(--border);
@@ -638,6 +693,11 @@
       <button class="act-btn save-btn" onclick="saveCurrentAff()">♡ Save</button>
       <button class="act-btn copy-btn" id="copyBtn" onclick="copyAff()">⎘ Copy Affirmation</button>
       <button class="act-btn share-btn" onclick="shareAff()">↗ Share</button>
+      <button class="act-btn speak-btn" id="speakBtn" onclick="toggleSpeak()">🔊 Listen</button>
+    </div>
+    <div class="voice-row">
+      <label class="voice-label" for="voiceSelect">Voice:</label>
+      <select class="voice-select" id="voiceSelect"></select>
     </div>
   </div>
 
@@ -815,6 +875,7 @@ function quickRandom() {
 
 
 function showResult(item) {
+  stopSpeaking();
   const text = document.getElementById('affText');
   const theme = document.getElementById('affTheme');
   text.classList.add('fade');
@@ -901,6 +962,105 @@ function renderSaved() {
 
 function setLoading(on) {
   // No-op — generation is instant, no loading needed
+}
+
+// ─── Text-to-Speech ───────────────────────────────────────────────────────
+let isSpeaking = false;
+
+function populateVoices() {
+  const select = document.getElementById('voiceSelect');
+  const voices = window.speechSynthesis.getVoices();
+  // Only show English voices
+  const englishVoices = voices.filter(v => v.lang.startsWith('en'));
+  select.innerHTML = '';
+  englishVoices.forEach((v, i) => {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = `${v.name} (${v.lang})`;
+    // Pre-select a nice default if available
+    const nice = ['Samantha','Karen','Moira','Tessa','Ava','Allison','Fiona'];
+    if (nice.some(n => v.name.includes(n))) opt.selected = true;
+    select.appendChild(opt);
+  });
+}
+
+// Voices load async — populate when ready
+window.speechSynthesis.onvoiceschanged = populateVoices;
+populateVoices();
+
+function getSelectedVoice() {
+  const select = document.getElementById('voiceSelect');
+  const voices = window.speechSynthesis.getVoices().filter(v => v.lang.startsWith('en'));
+  return voices[select.selectedIndex] || null;
+}
+
+function toggleSpeak() {
+  const text = document.getElementById('affText').textContent;
+  const btn = document.getElementById('speakBtn');
+
+  if (!text || text.includes('appear here')) {
+    showToast('Generate an affirmation first ✦');
+    return;
+  }
+
+  if (isSpeaking) {
+    window.speechSynthesis.cancel();
+    isSpeaking = false;
+    btn.textContent = '🔊 Listen';
+    btn.classList.remove('speaking');
+    return;
+  }
+
+  // Split into sentences so we can add natural pauses between them
+  const sentences = text.match(/[^.!?,]+[.!?,]*/g) || [text];
+
+  let sentenceIndex = 0;
+
+  function speakNext() {
+    if (sentenceIndex >= sentences.length) {
+      isSpeaking = false;
+      btn.textContent = '🔊 Listen';
+      btn.classList.remove('speaking');
+      return;
+    }
+
+    const sentence = sentences[sentenceIndex].trim();
+    if (!sentence) { sentenceIndex++; speakNext(); return; }
+
+    const utterance = new SpeechSynthesisUtterance(sentence);
+    utterance.rate = 0.78;     // gentle pace — not rushed, not too slow
+    utterance.pitch = 1.12;    // warmer, more human feeling
+    utterance.volume = 0.95;   // slightly softer feels more intimate
+
+    const voice = getSelectedVoice();
+    if (voice) utterance.voice = voice;
+
+    utterance.onend = () => {
+      sentenceIndex++;
+      // Natural breath pause between sentences
+      setTimeout(speakNext, 650);
+    };
+
+    utterance.onerror = () => {
+      isSpeaking = false;
+      btn.textContent = '🔊 Listen';
+      btn.classList.remove('speaking');
+    };
+
+    window.speechSynthesis.speak(utterance);
+  }
+
+  isSpeaking = true;
+  btn.textContent = '⏹ Stop';
+  btn.classList.add('speaking');
+  speakNext();
+}
+
+function stopSpeaking() {
+  window.speechSynthesis.cancel();
+  isSpeaking = false;
+  const btn = document.getElementById('speakBtn');
+  if (btn) { btn.textContent = '🔊 Listen'; btn.classList.remove('speaking'); }
 }
 
 function openModal() {
