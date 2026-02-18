@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bloom — Your Affirmations</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Nunito:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0c1a;
+    --surface: #1a1628;
+    --surface2: #221e33;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --violet: #a78bfa;
+    --violet-soft: rgba(167,139,250,0.15);
+    --pink: #f472b6;
+    --gold: #fbbf24;
+    --text: #f0ebff;
+    --muted: #9590aa;
+    --dim: #5c5870;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .stars {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .star {
+    position: absolute;
+    border-radius: 50%;
+    background: white;
+    animation: twinkle var(--d, 3s) infinite var(--delay, 0s);
+    opacity: 0;
+  }
+  @keyframes twinkle {
+    0%,100% { opacity: 0; }
+    50% { opacity: var(--op, 0.6); }
+  }
+
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(100px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .orb-1 { width: 500px; height: 500px; background: rgba(139,92,246,0.18); top: -150px; right: -100px; }
+  .orb-2 { width: 400px; height: 400px; background: rgba(236,72,153,0.12); bottom: -100px; left: -80px; }
+  .orb-3 { width: 250px; height: 250px; background: rgba(251,191,36,0.08); top: 50%; left: 50%; transform: translate(-50%,-50%); }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 64px 24px 100px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 56px;
+    animation: fadeDown 0.9s ease both;
+  }
+  .icon-ring {
+    width: 64px; height: 64px;
+    background: var(--violet-soft);
+    border: 1px solid rgba(167,139,250,0.3);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem;
+    margin: 0 auto 20px;
+    box-shadow: 0 0 32px rgba(167,139,250,0.2);
+  }
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.4rem, 5.5vw, 3.4rem);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    background: linear-gradient(135deg, #e2d9f3 0%, #a78bfa 50%, #f472b6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  header p {
+    margin-top: 12px;
+    font-size: 0.95rem;
+    font-weight: 400;
+    color: var(--muted);
+    letter-spacing: 0.02em;
+  }
+
+  .vision-card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 24px;
+    padding: 36px;
+    margin-bottom: 24px;
+    animation: fadeUp 0.9s 0.1s ease both;
+    box-shadow: 0 4px 40px rgba(0,0,0,0.4);
+  }
+  .vision-card label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--violet);
+    margin-bottom: 12px;
+  }
+  .vision-textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px 20px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--text);
+    resize: none;
+    height: 110px;
+    outline: none;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    line-height: 1.6;
+  }
+  .vision-textarea::placeholder { color: var(--dim); }
+  .vision-textarea:focus {
+    border-color: rgba(167,139,250,0.4);
+    box-shadow: 0 0 0 3px rgba(167,139,250,0.08);
+  }
+
+  .mood-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+    margin-bottom: 20px;
+    align-items: center;
+  }
+  .quick-label {
+    font-size: 0.75rem;
+    color: var(--dim);
+    margin-right: 4px;
+  }
+  .mood-chip {
+    padding: 6px 16px;
+    border-radius: 100px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'Nunito', sans-serif;
+  }
+  .mood-chip:hover { border-color: rgba(167,139,250,0.4); color: var(--violet); }
+  .mood-chip.active {
+    background: var(--violet-soft);
+    border-color: rgba(167,139,250,0.5);
+    color: var(--violet);
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .btn-ai {
+    flex: 1;
+    min-width: 180px;
+    padding: 14px 24px;
+    border-radius: 14px;
+    border: none;
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: white;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 24px rgba(124,58,237,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn-ai:hover { transform: translateY(-2px); box-shadow: 0 6px 30px rgba(124,58,237,0.5); }
+  .btn-ai:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  .btn-random {
+    padding: 14px 22px;
+    border-radius: 14px;
+    border: 1px solid var(--border2);
+    background: var(--surface2);
+    color: var(--muted);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    white-space: nowrap;
+  }
+  .btn-random:hover { border-color: rgba(244,114,182,0.4); color: var(--pink); }
+
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+  .spinner.active { display: block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .result-area { animation: fadeUp 0.9s 0.2s ease both; }
+
+  .affirmation-card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 24px;
+    padding: 48px 40px;
+    text-align: center;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 40px rgba(0,0,0,0.4);
+    position: relative;
+    overflow: hidden;
+  }
+  .affirmation-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 24px;
+    background: linear-gradient(135deg, rgba(167,139,250,0.04), rgba(244,114,182,0.04));
+    pointer-events: none;
+  }
+  .card-glow {
+    position: absolute;
+    top: 0; left: 50%; transform: translateX(-50%);
+    width: 200px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--violet), transparent);
+  }
+
+  .affirmation-text {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.3rem, 3vw, 1.75rem);
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--text);
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    position: relative;
+    z-index: 1;
+  }
+  .affirmation-text.fade { opacity: 0; transform: translateY(10px); }
+
+  .affirmation-text.placeholder-text {
+    color: var(--dim);
+    font-style: italic;
+    font-size: 1.1rem;
+  }
+    margin-top: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--violet);
+    opacity: 0.7;
+  }
+
+  .card-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+  }
+  .act-btn {
+    padding: 10px 20px;
+    border-radius: 100px;
+    border: 1px solid var(--border2);
+    background: var(--surface);
+    color: var(--muted);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .act-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+  .act-btn.save-btn:hover { color: var(--pink); border-color: rgba(244,114,182,0.4); }
+  .act-btn.copy-btn {
+    background: rgba(251,191,36,0.12);
+    border: 1.5px solid rgba(251,191,36,0.45);
+    color: var(--gold);
+    font-weight: 600;
+    padding: 11px 26px;
+    font-size: 0.88rem;
+    box-shadow: 0 0 16px rgba(251,191,36,0.1);
+  }
+  .act-btn.copy-btn:hover {
+    background: rgba(251,191,36,0.22);
+    border-color: rgba(251,191,36,0.7);
+    box-shadow: 0 0 24px rgba(251,191,36,0.2);
+    transform: translateY(-1px);
+  }
+
+  .act-btn.share-btn {
+    background: rgba(52, 211, 153, 0.1);
+    border: 1.5px solid rgba(52, 211, 153, 0.4);
+    color: #34d399;
+    font-weight: 600;
+    padding: 11px 26px;
+    font-size: 0.88rem;
+    box-shadow: 0 0 16px rgba(52, 211, 153, 0.08);
+  }
+  .act-btn.share-btn:hover {
+    background: rgba(52, 211, 153, 0.2);
+    border-color: rgba(52, 211, 153, 0.7);
+    box-shadow: 0 0 24px rgba(52, 211, 153, 0.18);
+    transform: translateY(-1px);
+  }
+  .section-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .section-title h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: var(--muted);
+    font-style: italic;
+  }
+  .clear-all {
+    font-size: 0.75rem;
+    color: var(--dim);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    transition: color 0.2s;
+  }
+  .clear-all:hover { color: var(--pink); }
+
+  .saved-list { display: flex; flex-direction: column; gap: 10px; }
+  .saved-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px 20px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    animation: fadeUp 0.4s ease;
+    transition: border-color 0.2s;
+  }
+  .saved-item:hover { border-color: var(--border2); }
+  .saved-item p {
+    flex: 1;
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.55;
+    color: #c8c0e0;
+  }
+  .theme-badge {
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--violet);
+    opacity: 0.6;
+    margin-top: 6px;
+    font-family: 'Nunito', sans-serif;
+  }
+  .del-item {
+    background: none;
+    border: none;
+    color: var(--dim);
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 2px;
+    transition: color 0.2s;
+    flex-shrink: 0;
+    line-height: 1;
+    margin-top: 2px;
+  }
+  .del-item:hover { color: var(--pink); }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 40px 0;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    padding: 12px 24px;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none;
+    z-index: 100;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @keyframes fadeDown { from { opacity:0; transform:translateY(-24px); } to { opacity:1; transform:none; } }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:none; } }
+
+  @media (max-width: 520px) {
+    .vision-card { padding: 24px 20px; }
+    .affirmation-card { padding: 36px 24px; }
+    .btn-ai { min-width: 140px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<div class="container">
+  <header>
+    <div class="icon-ring">✦</div>
+    <h1>Manifest Your Words</h1>
+    <p>Describe the life you want — receive affirmations that help you believe it</p>
+  </header>
+
+  <div class="vision-card">
+    <label>What do you want in your life?</label>
+    <textarea class="vision-textarea" id="visionInput" placeholder="e.g. I want to feel more confident in my career, find inner peace, attract loving relationships, and build healthy habits that stick..."></textarea>
+
+    <div class="mood-row">
+      <span class="quick-label">Quick add:</span>
+      <button class="mood-chip" data-text="more confidence and self-belief">Confidence</button>
+      <button class="mood-chip" data-text="inner peace and a calm mind">Peace</button>
+      <button class="mood-chip" data-text="financial abundance and security">Abundance</button>
+      <button class="mood-chip" data-text="deeper, loving relationships">Love</button>
+      <button class="mood-chip" data-text="better health and energy">Health</button>
+      <button class="mood-chip" data-text="clarity of purpose and direction">Purpose</button>
+      <button class="mood-chip" data-text="joy and gratitude every day">Joy</button>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-ai" id="generateBtn" onclick="generateAI()">
+        <div class="spinner" id="spinner"></div>
+        <span id="btnLabel">✦ Create New Affirmation</span>
+      </button>
+      <button class="btn-random" id="randomBtn" onclick="quickRandom()">✨ Surprise me</button>
+    </div>
+  </div>
+
+  <div class="result-area" id="resultArea">
+    <div class="affirmation-card">
+      <div class="card-glow"></div>
+      <p class="affirmation-text placeholder-text" id="affText">Your affirmation will appear here...</p>
+      <p class="affirmation-theme" id="affTheme"></p>
+    </div>
+    <div class="card-actions">
+      <button class="act-btn save-btn" onclick="saveCurrentAff()">♡ Save</button>
+      <button class="act-btn copy-btn" id="copyBtn" onclick="copyAff()">⎘ Copy Affirmation</button>
+      <button class="act-btn share-btn" onclick="shareAff()">↗ Share</button>
+    </div>
+  </div>
+
+  <div class="saved-section" id="savedSection" style="display:none">
+    <div class="divider"></div>
+    <div class="section-title">
+      <h3>Your Collection</h3>
+      <button class="clear-all" onclick="clearAll()">Clear all</button>
+    </div>
+    <div class="saved-list" id="savedList"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function() {
+  const container = document.getElementById('stars');
+  for (let i = 0; i < 80; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 2 + 0.5;
+    s.style.cssText = `width:${size}px;height:${size}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--d:${2+Math.random()*4}s;--delay:${Math.random()*5}s;--op:${0.3+Math.random()*0.7};`;
+    container.appendChild(s);
+  }
+})();
+
+let currentBatch = [];
+let currentIndex = 0;
+let saved = JSON.parse(localStorage.getItem('bloom_saved_v2') || '[]');
+
+document.querySelectorAll('.mood-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    const input = document.getElementById('visionInput');
+    const add = chip.dataset.text;
+    chip.classList.toggle('active');
+    if (chip.classList.contains('active')) {
+      input.value = input.value ? input.value.trimEnd() + ', ' + add : add;
+    } else {
+      input.value = input.value.replace(', ' + add, '').replace(add + ', ', '').replace(add, '').trim();
+    }
+  });
+});
+
+// ─── Pure JS Affirmation Engine — no API needed ───────────────────────────
+
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+// Vision keyword extractor — pulls meaningful words from user input
+function keywords(vision) {
+  const stop = new Set(['i','want','to','a','an','the','and','or','in','my','me','more','feel','have','be','of','with','for','that','is','are','it','so','very','really','just','get']);
+  return vision.toLowerCase().replace(/[^a-z\s]/g,'').split(/\s+/).filter(w => w.length > 2 && !stop.has(w));
+}
+
+// Building blocks
+const openers = [
+  "I am", "I have", "I feel", "I attract", "I radiate", "I embrace",
+  "I trust", "I breathe", "I welcome", "I choose", "I embody", "I rise",
+  "I shine", "I stand", "I create", "I live", "I carry within me",
+  "Every morning I", "With every breath I", "Deep within me",
+  "I move through life", "I give myself permission to", "I know",
+  "My heart", "My life", "Within me lives"
+];
+
+const middles = [
+  "an abundance of", "a deep and growing sense of", "the freedom that comes from",
+  "the quiet certainty of", "a river of", "the warm light of",
+  "the unshakeable truth of", "a beautiful capacity for", "an endless source of",
+  "the courage to embrace", "a natural gift for", "the joy of",
+  "the strength that comes from", "a radiant", "the peace of",
+  "a powerful connection to", "the magic of simply being", "complete trust in",
+  "the energy of", "an overflowing heart full of", "a deep devotion to"
+];
+
+const closers = [
+  "and it grows stronger every single day.",
+  "flowing into every corner of my life.",
+  "and I welcome it with wide open arms.",
+  "and nothing can take that from me.",
+  "that lights up everything around me.",
+  "rooted deep, like trees that cannot be moved.",
+  "and the world reflects it back to me.",
+  "in ways I am still discovering.",
+  "and it is more than enough.",
+  "that surprises and delights me daily.",
+  "and I trust completely in this truth.",
+  "as natural as breathing, as steady as the tide.",
+  "and today I choose to honour that fully.",
+  "without needing permission from anyone.",
+  "and life keeps showing me how real this is.",
+  "that has always lived inside me, waiting.",
+  "growing quietly and powerfully within.",
+  "that no storm has ever been able to dim."
+];
+
+const themes = [
+  "Inner Peace","Self-Trust","Abundance","Courage","Healing","Joy",
+  "Confidence","Growth","Freedom","Love","Purpose","Resilience",
+  "Alignment","Creativity","Wellness","Gratitude","Manifestation","Connection"
+];
+
+// Vision-aware templates — slot in keywords from user's input
+const visionTemplates = [
+  (kws, o, m, c) => `${o} ${m} ${kws[0] || 'possibility'}, ${c}`,
+  (kws, o, m, c) => `${o} ${m} ${kws[0] || 'growth'} and ${kws[1] || 'joy'}, ${c}`,
+  (kws, o, m, c) => `${o} deeply capable of ${kws[0] || 'achieving'} what I most desire, ${c}`,
+  (kws, o, m, c) => `${o} ${m} ${kws[0] || 'strength'} — and I carry it gently, ${c}`,
+  (kws, o, m, c) => `${o} worthy of ${kws[0] || 'all I desire'}, and I claim it fully, ${c}`,
+  (kws, o, m, c) => `${o} ${m} ${kws[0] || 'peace'}, and it shapes everything I do, ${c}`,
+  (kws, o, m, c) => `${o} becoming someone who naturally attracts ${kws[0] || 'what I need'}, ${c}`,
+  (kws, o, m, c) => `${o} ${m} authentic ${kws[0] || 'confidence'}, ${c}`,
+  (kws, o, m, c) => `${o} at peace with where I am, and excited by ${kws[0] || 'where I am going'}, ${c}`,
+  (kws, o, m, c) => `${o} creating a life rich with ${kws[0] || 'meaning'} and ${kws[1] || 'connection'}, ${c}`,
+  (kws, o, m, c) => `${o} releasing everything that blocks my ${kws[0] || 'growth'}, ${c}`,
+  (kws, o, m, c) => `${o} ${m} quiet certainty — my ${kws[0] || 'path'} is unfolding perfectly, ${c}`,
+];
+
+// Random templates — no keywords needed
+const randomTemplates = [
+  (o, m, c) => `${o} ${m} joy, and it spills over into everything I touch, ${c}`,
+  (o, m, c) => `${o} exactly where I need to be, becoming who I was always meant to be, ${c}`,
+  (o, m, c) => `${o} ${m} love — for myself, for others, for this one wild life, ${c}`,
+  (o, m, c) => `${o} free — free from fear, free to grow, free to be fully myself, ${c}`,
+  (o, m, c) => `${o} ${m} deep healing, and I honour every step of this journey, ${c}`,
+  (o, m, c) => `${o} a magnet for goodness, and it finds me easily, ${c}`,
+  (o, m, c) => `${o} ${m} quiet strength, steady as the ground beneath my feet, ${c}`,
+  (o, m, c) => `${o} enough — always enough — and I rest in that truth, ${c}`,
+  (o, m, c) => `${o} ${m} creative fire, and it lights up everything I make, ${c}`,
+  (o, m, c) => `${o} learning to trust myself more deeply every single day, ${c}`,
+  (o, m, c) => `${o} ${m} gratitude, and it transforms ordinary moments into gifts, ${c}`,
+  (o, m, c) => `${o} not behind. Not too late. Right on time for my own beautiful life, ${c}`,
+  (o, m, c) => `${o} ${m} resilience — every setback is quietly teaching me something, ${c}`,
+  (o, m, c) => `${o} deserving of rest, of love, and of everything good that is coming, ${c}`,
+  (o, m, c) => `${o} ${m} deep calm — the kind that stays even when life gets loud, ${c}`,
+];
+
+function buildVisionAffirmation(vision) {
+  const kws = keywords(vision);
+  if (kws.length === 0) kws.push('growth', 'joy'); // fallback
+  const template = pick(visionTemplates);
+  const o = pick(openers);
+  const m = pick(middles);
+  const c = pick(closers);
+  const raw = template(kws, o, m, c);
+  // Capitalise first letter
+  const affirmation = raw.charAt(0).toUpperCase() + raw.slice(1);
+  const theme = pick(themes);
+  return { affirmation, theme };
+}
+
+function buildRandomAffirmation() {
+  const template = pick(randomTemplates);
+  const o = pick(openers);
+  const m = pick(middles);
+  const c = pick(closers);
+  const raw = template(o, m, c);
+  const affirmation = raw.charAt(0).toUpperCase() + raw.slice(1);
+  const theme = pick(themes);
+  return { affirmation, theme };
+}
+
+function generateAI() {
+  const vision = document.getElementById('visionInput').value.trim();
+  if (!vision) {
+    document.getElementById('visionInput').focus();
+    showToast('Tell me what you want in your life ✦');
+    return;
+  }
+  showResult(buildVisionAffirmation(vision));
+}
+
+function quickRandom() {
+  showResult(buildRandomAffirmation());
+}
+
+
+function showResult(item) {
+  const text = document.getElementById('affText');
+  const theme = document.getElementById('affTheme');
+  text.classList.add('fade');
+  setTimeout(() => {
+    text.textContent = item.affirmation;
+    text.classList.remove('placeholder-text');
+    theme.textContent = item.theme;
+    text.classList.remove('fade');
+  }, 320);
+}
+
+function saveCurrentAff() {
+  const text = document.getElementById('affText').textContent;
+  const theme = document.getElementById('affTheme').textContent;
+  if (!text || saved.find(s => s.affirmation === text)) { showToast('Already saved ✓'); return; }
+  saved.unshift({ affirmation: text, theme });
+  localStorage.setItem('bloom_saved_v2', JSON.stringify(saved));
+  renderSaved();
+  showToast('Saved to your collection ♡');
+}
+
+function shareAff() {
+  const text = document.getElementById('affText').textContent;
+  const theme = document.getElementById('affTheme').textContent;
+  if (!text || text.includes('appear here')) { showToast('Generate an affirmation first ✦'); return; }
+
+  const shareText = `✨ ${text}\n\n— ${theme} affirmation from Bloom 🌸`;
+
+  // Use native share sheet if available (works great on iPhone!)
+  if (navigator.share) {
+    navigator.share({ text: shareText })
+      .then(() => showToast('Shared! 🌸'))
+      .catch(() => {}); // user cancelled — do nothing
+  } else {
+    // Desktop fallback — copy to clipboard
+    navigator.clipboard.writeText(shareText).then(() => {
+      showToast('Copied to clipboard — ready to paste & share! ⎘');
+    });
+  }
+}
+
+function copyAff() {
+  const text = document.getElementById('affText').textContent;
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = '✓ Copied!';
+    btn.style.background = 'rgba(251,191,36,0.25)';
+    showToast('Copied to clipboard ⎘');
+    setTimeout(() => {
+      btn.textContent = '⎘ Copy Affirmation';
+      btn.style.background = '';
+    }, 2000);
+  });
+}
+
+function deleteSaved(i) {
+  saved.splice(i, 1);
+  localStorage.setItem('bloom_saved_v2', JSON.stringify(saved));
+  renderSaved();
+}
+
+function clearAll() {
+  saved = [];
+  localStorage.setItem('bloom_saved_v2', JSON.stringify(saved));
+  renderSaved();
+}
+
+function renderSaved() {
+  const section = document.getElementById('savedSection');
+  const list = document.getElementById('savedList');
+  if (!saved.length) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  list.innerHTML = saved.map((s, i) => `
+    <div class="saved-item">
+      <div style="flex:1">
+        <p>${s.affirmation}</p>
+        <div class="theme-badge">${s.theme}</div>
+      </div>
+      <button class="del-item" onclick="deleteSaved(${i})">✕</button>
+    </div>
+  `).join('');
+}
+
+function setLoading(on) {
+  // No-op — generation is instant, no loading needed
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+document.getElementById('visionInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) generateAI();
+});
+
+renderSaved();
+</script>
+</body>
+</html>
