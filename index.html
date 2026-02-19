@@ -83,6 +83,19 @@
     margin: 0 auto 20px;
     box-shadow: 0 0 32px rgba(167,139,250,0.2);
   }
+  .app-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, rgba(167,139,250,0.2), rgba(244,114,182,0.2));
+    border: 1px solid rgba(167,139,250,0.4);
+    border-radius: 100px;
+    padding: 6px 18px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--violet);
+    margin-bottom: 16px;
+  }
   header h1 {
     font-family: 'Playfair Display', serif;
     font-size: clamp(2.4rem, 5.5vw, 3.4rem);
@@ -467,7 +480,14 @@
   }
 
   /* How it works modal */
-  .how-btn {
+  .tagline {
+    margin-top: 12px;
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--muted);
+    letter-spacing: 0.01em;
+    line-height: 1.6;
+  }
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -615,9 +635,9 @@
 
 <div class="container">
   <header>
-    <div class="icon-ring">✦</div>
+    <div class="app-badge">✦ Daily Affirmations App</div>
     <h1>Manifest Your Words</h1>
-    <p>Describe the life you want — receive affirmations that help you believe it</p>
+    <p class="tagline">The app that turns your dreams into daily affirmations —<br>speak them, believe them, live them.</p>
     <button class="how-btn" onclick="openModal()">? How affirmations work</button>
   </header>
 
@@ -746,52 +766,30 @@ document.querySelectorAll('.mood-chip').forEach(chip => {
 
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
-// Vision keyword extractor — pulls meaningful words from user input
+// Vision keyword extractor
 function keywords(vision) {
-  const stop = new Set(['i','want','to','a','an','the','and','or','in','my','me','more','feel','have','be','of','with','for','that','is','are','it','so','very','really','just','get']);
-  return vision.toLowerCase().replace(/[^a-z\s]/g,'').split(/\s+/).filter(w => w.length > 2 && !stop.has(w));
+  const stop = new Set([
+    'i','want','to','a','an','the','and','or','in','my','me','more','feel','have',
+    'be','of','with','for','that','is','are','it','so','very','really','just','get',
+    'like','love','find','life','live','feel','help','make','also','some','good',
+    'better','feel','able','want','would','could','things','thing','every','each',
+    'more','less','much','many','well','also','even','know','think','need','wish',
+    'hope','feel','seem','keep','start','stop','try','let','put','see','look','come',
+    'this','that','these','those','them','they','their','there','then','than','when',
+    'what','which','who','how','why','where','will','can','may','might','must','shall'
+  ]);
+  return vision
+    .toLowerCase()
+    .replace(/[^a-z\s]/g,'')
+    .split(/\s+/)
+    .filter(w =>
+      w.length > 3 &&
+      !stop.has(w) &&
+      !w.endsWith('ly') &&   // removes adverbs: freely, deeply, quickly etc
+      !w.endsWith('ing') &&  // removes gerunds used as verbs: wanting, feeling etc
+      !w.endsWith('ed')      // removes past tense verbs: wanted, needed etc
+    );
 }
-
-// Building blocks
-const openers = [
-  "I am", "I have", "I feel", "I attract", "I radiate", "I embrace",
-  "I trust", "I breathe", "I welcome", "I choose", "I embody", "I rise",
-  "I shine", "I stand", "I create", "I live", "I carry within me",
-  "Every morning I", "With every breath I", "Deep within me",
-  "I move through life", "I give myself permission to", "I know",
-  "My heart", "My life", "Within me lives"
-];
-
-const middles = [
-  "an abundance of", "a deep and growing sense of", "the freedom that comes from",
-  "the quiet certainty of", "a river of", "the warm light of",
-  "the unshakeable truth of", "a beautiful capacity for", "an endless source of",
-  "the courage to embrace", "a natural gift for", "the joy of",
-  "the strength that comes from", "a radiant", "the peace of",
-  "a powerful connection to", "the magic of simply being", "complete trust in",
-  "the energy of", "an overflowing heart full of", "a deep devotion to"
-];
-
-const closers = [
-  "and it grows stronger every single day.",
-  "flowing into every corner of my life.",
-  "and I welcome it with wide open arms.",
-  "and nothing can take that from me.",
-  "that lights up everything around me.",
-  "rooted deep, like trees that cannot be moved.",
-  "and the world reflects it back to me.",
-  "in ways I am still discovering.",
-  "and it is more than enough.",
-  "that surprises and delights me daily.",
-  "and I trust completely in this truth.",
-  "as natural as breathing, as steady as the tide.",
-  "and today I choose to honour that fully.",
-  "without needing permission from anyone.",
-  "and life keeps showing me how real this is.",
-  "that has always lived inside me, waiting.",
-  "growing quietly and powerfully within.",
-  "that no storm has ever been able to dim."
-];
 
 const themes = [
   "Inner Peace","Self-Trust","Abundance","Courage","Healing","Joy",
@@ -799,62 +797,62 @@ const themes = [
   "Alignment","Creativity","Wellness","Gratitude","Manifestation","Connection"
 ];
 
-// Vision-aware templates — slot in keywords from user's input
+// Vision templates — each is a complete, grammatically correct sentence
+// kw1, kw2 are keywords from the user's input with safe fallbacks
 const visionTemplates = [
-  (kws, o, m, c) => `${o} ${m} ${kws[0] || 'possibility'}, ${c}`,
-  (kws, o, m, c) => `${o} ${m} ${kws[0] || 'growth'} and ${kws[1] || 'joy'}, ${c}`,
-  (kws, o, m, c) => `${o} deeply capable of ${kws[0] || 'achieving'} what I most desire, ${c}`,
-  (kws, o, m, c) => `${o} ${m} ${kws[0] || 'strength'} — and I carry it gently, ${c}`,
-  (kws, o, m, c) => `${o} worthy of ${kws[0] || 'all I desire'}, and I claim it fully, ${c}`,
-  (kws, o, m, c) => `${o} ${m} ${kws[0] || 'peace'}, and it shapes everything I do, ${c}`,
-  (kws, o, m, c) => `${o} becoming someone who naturally attracts ${kws[0] || 'what I need'}, ${c}`,
-  (kws, o, m, c) => `${o} ${m} authentic ${kws[0] || 'confidence'}, ${c}`,
-  (kws, o, m, c) => `${o} at peace with where I am, and excited by ${kws[0] || 'where I am going'}, ${c}`,
-  (kws, o, m, c) => `${o} creating a life rich with ${kws[0] || 'meaning'} and ${kws[1] || 'connection'}, ${c}`,
-  (kws, o, m, c) => `${o} releasing everything that blocks my ${kws[0] || 'growth'}, ${c}`,
-  (kws, o, m, c) => `${o} ${m} quiet certainty — my ${kws[0] || 'path'} is unfolding perfectly, ${c}`,
+  kw => `I am becoming someone who naturally lives with more ${kw}, and every day I feel this growing within me.`,
+  kw => `I have everything I need to build a life full of ${kw}, and I trust myself to create it.`,
+  kw => `I choose ${kw} — it is my natural state, and I return to it with ease.`,
+  kw => `I am worthy of all the ${kw} I desire, and I open myself fully to receiving it now.`,
+  kw => `I radiate ${kw} from the inside out, and it shapes everything I attract into my life.`,
+  kw => `I embrace ${kw} as my birthright — it belongs to me and I step into it fully today.`,
+  kw => `With every breath, I welcome more ${kw} into my life, gently and without resistance.`,
+  kw => `I trust that ${kw} is already flowing toward me, even in ways I cannot yet see.`,
+  kw => `I am deeply aligned with ${kw}, and life continues to show me how real this is.`,
+  kw => `I allow ${kw} to fill every corner of my life — I am ready and I am open.`,
+  kw => `I am releasing everything that blocks my ${kw}, making space for all that is meant for me.`,
+  kw => `My relationship with ${kw} grows stronger every single day, quietly and powerfully.`,
+  kw => `I deserve a life rich with ${kw}, and I take one small step toward it every day.`,
+  kw => `I am not waiting for ${kw} — I am living it now, in every choice I make.`,
+  kw => `I carry a deep and growing sense of ${kw} within me that no circumstance can take away.`,
 ];
 
-// Random templates — no keywords needed
+// Random templates — complete, self-contained, grammatically correct
 const randomTemplates = [
-  (o, m, c) => `${o} ${m} joy, and it spills over into everything I touch, ${c}`,
-  (o, m, c) => `${o} exactly where I need to be, becoming who I was always meant to be, ${c}`,
-  (o, m, c) => `${o} ${m} love — for myself, for others, for this one wild life, ${c}`,
-  (o, m, c) => `${o} free — free from fear, free to grow, free to be fully myself, ${c}`,
-  (o, m, c) => `${o} ${m} deep healing, and I honour every step of this journey, ${c}`,
-  (o, m, c) => `${o} a magnet for goodness, and it finds me easily, ${c}`,
-  (o, m, c) => `${o} ${m} quiet strength, steady as the ground beneath my feet, ${c}`,
-  (o, m, c) => `${o} enough — always enough — and I rest in that truth, ${c}`,
-  (o, m, c) => `${o} ${m} creative fire, and it lights up everything I make, ${c}`,
-  (o, m, c) => `${o} learning to trust myself more deeply every single day, ${c}`,
-  (o, m, c) => `${o} ${m} gratitude, and it transforms ordinary moments into gifts, ${c}`,
-  (o, m, c) => `${o} not behind. Not too late. Right on time for my own beautiful life, ${c}`,
-  (o, m, c) => `${o} ${m} resilience — every setback is quietly teaching me something, ${c}`,
-  (o, m, c) => `${o} deserving of rest, of love, and of everything good that is coming, ${c}`,
-  (o, m, c) => `${o} ${m} deep calm — the kind that stays even when life gets loud, ${c}`,
+  () => `I am exactly where I need to be, and I trust the journey that is unfolding before me.`,
+  () => `I choose peace — not because life is perfect, but because I am.`,
+  () => `I am a magnet for goodness, and wonderful things find their way to me with ease.`,
+  () => `I am free — free from fear, free to grow, and free to be fully, unapologetically myself.`,
+  () => `I give myself permission to take up space, to be seen, and to shine without apology.`,
+  () => `I am not behind. I am not too late. I am right on time for my own beautiful life.`,
+  () => `I trust myself completely — my instincts guide me and my choices serve me well.`,
+  () => `I am healing in ways both seen and unseen, and I honour every step of this journey.`,
+  () => `I radiate warmth and confidence, and the world around me reflects that back beautifully.`,
+  () => `I deserve deep rest, real love, and a life that feels genuinely mine.`,
+  () => `I am grateful for who I am today and excited about who I am still becoming.`,
+  () => `Joy is not something I have to earn — it is my birthright, and I claim it right now.`,
+  () => `I attract relationships that nourish me, challenge me, and lift me higher.`,
+  () => `I am resilient. Every challenge I face is quietly making me wiser and stronger.`,
+  () => `I move through life with grace and ease, and good things come to me naturally.`,
+  () => `My mind is calm, my heart is open, and I am ready for everything that is coming.`,
+  () => `I choose to see the beauty in this moment — it is always there if I look for it.`,
+  () => `I am creative, capable, and full of ideas that have the power to change my world.`,
+  () => `Abundance flows to me in expected and unexpected ways, and I receive it with gratitude.`,
+  () => `I am learning to love myself more fully every single day, and it changes everything.`,
 ];
 
 function buildVisionAffirmation(vision) {
   const kws = keywords(vision);
-  if (kws.length === 0) kws.push('growth', 'joy'); // fallback
+  const kw = kws[0] || pick(['confidence','peace','joy','love','abundance','health','growth','clarity']);
   const template = pick(visionTemplates);
-  const o = pick(openers);
-  const m = pick(middles);
-  const c = pick(closers);
-  const raw = template(kws, o, m, c);
-  // Capitalise first letter
-  const affirmation = raw.charAt(0).toUpperCase() + raw.slice(1);
+  const affirmation = template(kw);
   const theme = pick(themes);
   return { affirmation, theme };
 }
 
 function buildRandomAffirmation() {
   const template = pick(randomTemplates);
-  const o = pick(openers);
-  const m = pick(middles);
-  const c = pick(closers);
-  const raw = template(o, m, c);
-  const affirmation = raw.charAt(0).toUpperCase() + raw.slice(1);
+  const affirmation = template();
   const theme = pick(themes);
   return { affirmation, theme };
 }
