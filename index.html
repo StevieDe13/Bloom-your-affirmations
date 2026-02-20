@@ -297,14 +297,18 @@
 
   .divider { height: 1px; background: var(--border); margin: 40px 0; }
 
-  .game-link {
+  .act-btn.game-btn {
     background: linear-gradient(135deg, rgba(251,191,36,0.15), rgba(244,114,182,0.15));
-    border-color: rgba(251,191,36,0.4);
+    border: 1.5px solid rgba(251,191,36,0.4);
     color: var(--gold);
+    font-weight: 600;
+    padding: 11px 26px;
+    font-size: 0.88rem;
     text-decoration: none;
-    margin-left: 8px;
   }
-  .game-link:hover { color: var(--gold); border-color: rgba(251,191,36,0.7); background: rgba(251,191,36,0.22); }
+  .act-btn.game-btn:hover { background: rgba(251,191,36,0.25); border-color: rgba(251,191,36,0.7); transform: translateY(-1px); }
+
+  .modal-overlay {
     position: fixed;
     inset: 0;
     background: rgba(0,0,0,0.7);
@@ -399,39 +403,7 @@
     <h1>Manifest Your Words</h1>
     <p class="tagline">The app that turns your dreams into daily affirmations —<br>speak them, believe them, live them.</p>
     <button class="how-btn" onclick="openModal()">? How affirmations work</button>
-    <a class="how-btn game-link" href="affirmations-game.html">🎮 Play Affirmation Pairs</a>
   </header>
-
-  <div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
-    <div class="modal">
-      <button class="modal-close" onclick="closeModal()">✕</button>
-      <h2>How Affirmations Work</h2>
-      <p class="modal-subtitle">A simple guide to getting the most from your practice</p>
-      <div class="modal-section">
-        <h3>🧠 What is an affirmation?</h3>
-        <p>An affirmation is a positive statement written in the present tense, as if what you want is already true. The idea is to train your mind to believe something before it has fully happened — shifting your thoughts, feelings, and ultimately your actions toward the life you want.</p>
-      </div>
-      <div class="modal-section">
-        <h3>✨ Why do they work?</h3>
-        <p>Your brain has a system called the Reticular Activating System (RAS) that filters what you notice in the world. When you repeat affirmations regularly, you're essentially programming your RAS to spot opportunities, people, and situations that align with your goals — things you might have overlooked before.</p>
-      </div>
-      <div class="modal-section">
-        <h3>🌅 When should I use them?</h3>
-        <p>The best times are first thing in the morning before your mind fills with the day's noise, and last thing at night when your subconscious is most receptive. Even just 5 minutes of reading or repeating your affirmation can make a real difference over time.</p>
-      </div>
-      <div class="modal-section">
-        <h3>🔁 How do I use this app?</h3>
-        <p>Describe what you genuinely want in your life in the box — be as specific or as broad as you like. Press <em>Create New Affirmation</em> to get one tailored to your vision, or <em>Surprise me</em> for a random spark of inspiration. When one resonates, save it and come back to it daily.</p>
-      </div>
-      <div class="modal-section">
-        <h3>💛 Tips for best results</h3>
-        <p>Say your affirmation out loud if you can. Feel it as you say it — don't just read the words, try to genuinely connect with the emotion behind them. Consistency matters more than perfection. Even on days it feels silly, keep going. The shift happens gradually and then all at once.</p>
-      </div>
-      <div class="modal-tip">
-        <strong>Remember:</strong> Affirmations work best alongside action. They open your mind to possibility — but taking small steps toward your vision every day is what makes the magic real.
-      </div>
-    </div>
-  </div>
 
   <div class="vision-card">
     <label>What do you want in your life?</label>
@@ -465,6 +437,7 @@
       <button class="act-btn copy-btn" id="copyBtn" onclick="copyAff()">⎘ Copy Affirmation</button>
       <button class="act-btn share-btn" onclick="shareAff()">↗ Share</button>
       <button class="act-btn speak-btn" id="speakBtn" onclick="toggleSpeak()">🔊 Listen</button>
+      <a class="act-btn game-btn" id="gameBtn" href="affirmations-game.html">🎮 Play Affirmation Pairs</a>
     </div>
   </div>
 
@@ -520,7 +493,9 @@ function keywords(vision) {
     'well','even','know','think','need','wish','hope','seem','keep','start','stop',
     'try','let','put','see','look','come','this','that','these','those','them',
     'they','their','there','then','than','when','what','which','who','how','why',
-    'where','will','can','may','might','must','shall'
+    'where','will','can','may','might','must','shall','myself','yourself','himself',
+    'herself','itself','ourselves','themselves','into','onto','upon','about','above',
+    'below','through','during','before','after','from','down','over','under','again'
   ]);
   return vision.toLowerCase().replace(/[^a-z\s]/g,'').split(/\s+/).filter(w =>
     w.length > 3 && !stop.has(w) && !w.endsWith('ly') && !w.endsWith('ing') && !w.endsWith('ed')
@@ -737,5 +712,36 @@ document.getElementById('visionInput').addEventListener('keydown', e => {
 
 renderSaved();
 </script>
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <h2>How Affirmations Work</h2>
+      <p class="modal-subtitle">A simple guide to getting the most from your practice</p>
+      <div class="modal-section">
+        <h3>🧠 What is an affirmation?</h3>
+        <p>An affirmation is a positive statement written in the present tense, as if what you want is already true. The idea is to train your mind to believe something before it has fully happened — shifting your thoughts, feelings, and ultimately your actions toward the life you want.</p>
+      </div>
+      <div class="modal-section">
+        <h3>✨ Why do they work?</h3>
+        <p>Your brain has a system called the Reticular Activating System (RAS) that filters what you notice in the world. When you repeat affirmations regularly, you're essentially programming your RAS to spot opportunities, people, and situations that align with your goals — things you might have overlooked before.</p>
+      </div>
+      <div class="modal-section">
+        <h3>🌅 When should I use them?</h3>
+        <p>The best times are first thing in the morning before your mind fills with the day's noise, and last thing at night when your subconscious is most receptive. Even just 5 minutes of reading or repeating your affirmation can make a real difference over time.</p>
+      </div>
+      <div class="modal-section">
+        <h3>🔁 How do I use this app?</h3>
+        <p>Describe what you genuinely want in your life in the box — be as specific or as broad as you like. Press <em>Create New Affirmation</em> to get one tailored to your vision, or <em>Surprise me</em> for a random spark of inspiration. When one resonates, save it and come back to it daily.</p>
+      </div>
+      <div class="modal-section">
+        <h3>💛 Tips for best results</h3>
+        <p>Say your affirmation out loud if you can. Feel it as you say it — don't just read the words, try to genuinely connect with the emotion behind them. Consistency matters more than perfection. Even on days it feels silly, keep going. The shift happens gradually and then all at once.</p>
+      </div>
+      <div class="modal-tip">
+        <strong>Remember:</strong> Affirmations work best alongside action. They open your mind to possibility — but taking small steps toward your vision every day is what makes the magic real.
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
