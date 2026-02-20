@@ -348,7 +348,28 @@
   .modal-tip { background: var(--surface2); border: 1px solid var(--border); border-radius: 16px; padding: 16px 20px; margin-top: 24px; font-size: 0.85rem; color: var(--muted); line-height: 1.6; font-style: italic; }
   .modal-tip strong { color: var(--violet); font-style: normal; }
 
-  .toast {
+  /* Fixed floating game button — always visible */
+  .float-game-btn {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 999;
+    padding: 14px 22px;
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    border: none;
+    border-radius: 100px;
+    color: white;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 4px 24px rgba(124,58,237,0.5);
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .float-game-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 32px rgba(124,58,237,0.6); }
     position: fixed;
     bottom: 32px;
     left: 50%;
@@ -746,6 +767,8 @@ renderSaved();
       </div>
     </div>
   </div>
+
+<a class="float-game-btn" href="affirmations-game.html">🎮 Play Affirmation Pairs</a>
 
 </body>
 </html>
