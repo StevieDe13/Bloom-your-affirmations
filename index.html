@@ -31,12 +31,7 @@
     overflow-x: hidden;
   }
 
-  .stars {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-  }
+  .stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
   .star {
     position: absolute;
     border-radius: 50%;
@@ -44,45 +39,17 @@
     animation: twinkle var(--d, 3s) infinite var(--delay, 0s);
     opacity: 0;
   }
-  @keyframes twinkle {
-    0%,100% { opacity: 0; }
-    50% { opacity: var(--op, 0.6); }
-  }
+  @keyframes twinkle { 0%,100% { opacity: 0; } 50% { opacity: var(--op, 0.6); } }
 
-  .orb {
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(100px);
-    pointer-events: none;
-    z-index: 0;
-  }
+  .orb { position: fixed; border-radius: 50%; filter: blur(100px); pointer-events: none; z-index: 0; }
   .orb-1 { width: 500px; height: 500px; background: rgba(139,92,246,0.18); top: -150px; right: -100px; }
   .orb-2 { width: 400px; height: 400px; background: rgba(236,72,153,0.12); bottom: -100px; left: -80px; }
   .orb-3 { width: 250px; height: 250px; background: rgba(251,191,36,0.08); top: 50%; left: 50%; transform: translate(-50%,-50%); }
 
-  .container {
-    position: relative;
-    z-index: 1;
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 64px 24px 100px;
-  }
+  .container { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; padding: 64px 24px 100px; }
 
-  header {
-    text-align: center;
-    margin-bottom: 56px;
-    animation: fadeDown 0.9s ease both;
-  }
-  .icon-ring {
-    width: 64px; height: 64px;
-    background: var(--violet-soft);
-    border: 1px solid rgba(167,139,250,0.3);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.6rem;
-    margin: 0 auto 20px;
-    box-shadow: 0 0 32px rgba(167,139,250,0.2);
-  }
+  header { text-align: center; margin-bottom: 56px; animation: fadeDown 0.9s ease both; }
+
   .app-badge {
     display: inline-block;
     background: linear-gradient(135deg, rgba(167,139,250,0.2), rgba(244,114,182,0.2));
@@ -96,6 +63,7 @@
     color: var(--violet);
     margin-bottom: 16px;
   }
+
   header h1 {
     font-family: 'Playfair Display', serif;
     font-size: clamp(2.4rem, 5.5vw, 3.4rem);
@@ -107,13 +75,34 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-  header p {
+
+  .tagline {
     margin-top: 12px;
-    font-size: 0.95rem;
+    font-size: 1rem;
     font-weight: 400;
     color: var(--muted);
-    letter-spacing: 0.02em;
+    letter-spacing: 0.01em;
+    line-height: 1.6;
   }
+
+  .how-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 16px;
+    padding: 8px 18px;
+    border-radius: 100px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.03em;
+  }
+  .how-btn:hover { color: var(--violet); border-color: rgba(167,139,250,0.4); }
 
   .vision-card {
     background: var(--surface);
@@ -141,7 +130,6 @@
     padding: 18px 20px;
     font-family: 'Nunito', sans-serif;
     font-size: 1rem;
-    font-weight: 400;
     color: var(--text);
     resize: none;
     height: 110px;
@@ -150,24 +138,10 @@
     line-height: 1.6;
   }
   .vision-textarea::placeholder { color: var(--dim); }
-  .vision-textarea:focus {
-    border-color: rgba(167,139,250,0.4);
-    box-shadow: 0 0 0 3px rgba(167,139,250,0.08);
-  }
+  .vision-textarea:focus { border-color: rgba(167,139,250,0.4); box-shadow: 0 0 0 3px rgba(167,139,250,0.08); }
 
-  .mood-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 16px;
-    margin-bottom: 20px;
-    align-items: center;
-  }
-  .quick-label {
-    font-size: 0.75rem;
-    color: var(--dim);
-    margin-right: 4px;
-  }
+  .mood-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; margin-bottom: 20px; align-items: center; }
+  .quick-label { font-size: 0.75rem; color: var(--dim); margin-right: 4px; }
   .mood-chip {
     padding: 6px 16px;
     border-radius: 100px;
@@ -181,17 +155,9 @@
     font-family: 'Nunito', sans-serif;
   }
   .mood-chip:hover { border-color: rgba(167,139,250,0.4); color: var(--violet); }
-  .mood-chip.active {
-    background: var(--violet-soft);
-    border-color: rgba(167,139,250,0.5);
-    color: var(--violet);
-  }
+  .mood-chip.active { background: var(--violet-soft); border-color: rgba(167,139,250,0.5); color: var(--violet); }
 
-  .btn-row {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
+  .btn-row { display: flex; gap: 12px; flex-wrap: wrap; }
   .btn-ai {
     flex: 1;
     min-width: 180px;
@@ -212,7 +178,6 @@
     gap: 8px;
   }
   .btn-ai:hover { transform: translateY(-2px); box-shadow: 0 6px 30px rgba(124,58,237,0.5); }
-  .btn-ai:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
   .btn-random {
     padding: 14px 22px;
@@ -228,17 +193,6 @@
     white-space: nowrap;
   }
   .btn-random:hover { border-color: rgba(244,114,182,0.4); color: var(--pink); }
-
-  .spinner {
-    width: 16px; height: 16px;
-    border: 2px solid rgba(255,255,255,0.3);
-    border-top-color: white;
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    display: none;
-  }
-  .spinner.active { display: block; }
-  @keyframes spin { to { transform: rotate(360deg); } }
 
   .result-area { animation: fadeUp 0.9s 0.2s ease both; }
 
@@ -279,12 +233,9 @@
     z-index: 1;
   }
   .affirmation-text.fade { opacity: 0; transform: translateY(10px); }
+  .affirmation-text.placeholder-text { color: var(--dim); font-style: italic; font-size: 1.1rem; }
 
-  .affirmation-text.placeholder-text {
-    color: var(--dim);
-    font-style: italic;
-    font-size: 1.1rem;
-  }
+  .affirmation-theme {
     margin-top: 20px;
     font-size: 0.75rem;
     font-weight: 600;
@@ -294,13 +245,7 @@
     opacity: 0.7;
   }
 
-  .card-actions {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    margin-bottom: 40px;
-    flex-wrap: wrap;
-  }
+  .card-actions { display: flex; justify-content: center; gap: 12px; margin-bottom: 40px; flex-wrap: wrap; }
   .act-btn {
     padding: 10px 20px;
     border-radius: 100px;
@@ -327,97 +272,16 @@
     font-size: 0.88rem;
     box-shadow: 0 0 16px rgba(251,191,36,0.1);
   }
-  .act-btn.copy-btn:hover {
-    background: rgba(251,191,36,0.22);
-    border-color: rgba(251,191,36,0.7);
-    box-shadow: 0 0 24px rgba(251,191,36,0.2);
-    transform: translateY(-1px);
-  }
-
+  .act-btn.copy-btn:hover { background: rgba(251,191,36,0.22); border-color: rgba(251,191,36,0.7); box-shadow: 0 0 24px rgba(251,191,36,0.2); transform: translateY(-1px); }
   .act-btn.share-btn {
-    background: rgba(52, 211, 153, 0.1);
-    border: 1.5px solid rgba(52, 211, 153, 0.4);
+    background: rgba(52,211,153,0.1);
+    border: 1.5px solid rgba(52,211,153,0.4);
     color: #34d399;
     font-weight: 600;
     padding: 11px 26px;
     font-size: 0.88rem;
-    box-shadow: 0 0 16px rgba(52, 211, 153, 0.08);
   }
-  .act-btn.share-btn:hover {
-    background: rgba(52, 211, 153, 0.2);
-    border-color: rgba(52, 211, 153, 0.7);
-    box-shadow: 0 0 24px rgba(52, 211, 153, 0.18);
-    transform: translateY(-1px);
-  }
-  .section-title {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-  }
-  .section-title h3 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.1rem;
-    font-weight: 400;
-    color: var(--muted);
-    font-style: italic;
-  }
-  .clear-all {
-    font-size: 0.75rem;
-    color: var(--dim);
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-family: 'Nunito', sans-serif;
-    transition: color 0.2s;
-  }
-  .clear-all:hover { color: var(--pink); }
-
-  .saved-list { display: flex; flex-direction: column; gap: 10px; }
-  .saved-item {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 18px 20px;
-    display: flex;
-    gap: 14px;
-    align-items: flex-start;
-    animation: fadeUp 0.4s ease;
-    transition: border-color 0.2s;
-  }
-  .saved-item:hover { border-color: var(--border2); }
-  .saved-item p {
-    flex: 1;
-    font-family: 'Playfair Display', serif;
-    font-size: 1rem;
-    font-weight: 400;
-    line-height: 1.55;
-    color: #c8c0e0;
-  }
-  .theme-badge {
-    font-size: 0.68rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--violet);
-    opacity: 0.6;
-    margin-top: 6px;
-    font-family: 'Nunito', sans-serif;
-  }
-  .del-item {
-    background: none;
-    border: none;
-    color: var(--dim);
-    cursor: pointer;
-    font-size: 0.9rem;
-    padding: 2px;
-    transition: color 0.2s;
-    flex-shrink: 0;
-    line-height: 1;
-    margin-top: 2px;
-  }
-  .del-item:hover { color: var(--pink); }
-
+  .act-btn.share-btn:hover { background: rgba(52,211,153,0.2); border-color: rgba(52,211,153,0.7); transform: translateY(-1px); }
   .act-btn.speak-btn {
     background: rgba(167,139,250,0.12);
     border: 1.5px solid rgba(167,139,250,0.4);
@@ -427,86 +291,20 @@
     font-size: 0.88rem;
     box-shadow: 0 0 16px rgba(167,139,250,0.08);
   }
-  .act-btn.speak-btn:hover {
-    background: rgba(167,139,250,0.22);
-    border-color: rgba(167,139,250,0.7);
-    box-shadow: 0 0 24px rgba(167,139,250,0.2);
-    transform: translateY(-1px);
-  }
-  .act-btn.speak-btn.speaking {
-    background: rgba(167,139,250,0.25);
-    border-color: var(--violet);
-    animation: pulse-speak 1.5s infinite;
-  }
-  @keyframes pulse-speak {
-    0%, 100% { box-shadow: 0 0 16px rgba(167,139,250,0.2); }
-    50% { box-shadow: 0 0 32px rgba(167,139,250,0.5); }
-  }
+  .act-btn.speak-btn:hover { background: rgba(167,139,250,0.22); border-color: rgba(167,139,250,0.7); transform: translateY(-1px); }
+  .act-btn.speak-btn.speaking { background: rgba(167,139,250,0.25); border-color: var(--violet); animation: pulse-speak 1.5s infinite; }
+  @keyframes pulse-speak { 0%,100% { box-shadow: 0 0 16px rgba(167,139,250,0.2); } 50% { box-shadow: 0 0 32px rgba(167,139,250,0.5); } }
 
-  .voice-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 40px;
-    flex-wrap: wrap;
-  }
-  .voice-label {
-    font-size: 0.78rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--dim);
-  }
-  .voice-select {
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    border-radius: 10px;
-    color: var(--muted);
-    font-family: 'Nunito', sans-serif;
-    font-size: 0.85rem;
-    padding: 7px 12px;
-    outline: none;
-    cursor: pointer;
-    transition: border-color 0.2s;
-    max-width: 240px;
-  }
-  .voice-select:focus { border-color: rgba(167,139,250,0.5); color: var(--text); }
+  .divider { height: 1px; background: var(--border); margin: 40px 0; }
 
-  .divider {
-    height: 1px;
-    background: var(--border);
-    margin: 40px 0;
+  .game-link {
+    background: linear-gradient(135deg, rgba(251,191,36,0.15), rgba(244,114,182,0.15));
+    border-color: rgba(251,191,36,0.4);
+    color: var(--gold);
+    text-decoration: none;
+    margin-left: 8px;
   }
-
-  /* How it works modal */
-  .tagline {
-    margin-top: 12px;
-    font-size: 1rem;
-    font-weight: 400;
-    color: var(--muted);
-    letter-spacing: 0.01em;
-    line-height: 1.6;
-  }
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: 16px;
-    padding: 8px 18px;
-    border-radius: 100px;
-    border: 1px solid var(--border2);
-    background: transparent;
-    color: var(--muted);
-    font-family: 'Nunito', sans-serif;
-    font-size: 0.8rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    letter-spacing: 0.03em;
-  }
-  .how-btn:hover { color: var(--violet); border-color: rgba(167,139,250,0.4); }
-
-  .modal-overlay {
+  .game-link:hover { color: var(--gold); border-color: rgba(251,191,36,0.7); background: rgba(251,191,36,0.22); }
     position: fixed;
     inset: 0;
     background: rgba(0,0,0,0.7);
@@ -521,7 +319,6 @@
     transition: opacity 0.3s ease;
   }
   .modal-overlay.open { opacity: 1; pointer-events: all; }
-
   .modal {
     background: var(--surface);
     border: 1px solid var(--border2);
@@ -537,66 +334,17 @@
     position: relative;
   }
   .modal-overlay.open .modal { transform: translateY(0); }
-
-  .modal-close {
-    position: absolute;
-    top: 16px; right: 20px;
-    background: none;
-    border: none;
-    color: var(--dim);
-    font-size: 1.4rem;
-    cursor: pointer;
-    transition: color 0.2s;
-    line-height: 1;
-  }
+  .modal-close { position: absolute; top: 16px; right: 20px; background: none; border: none; color: var(--dim); font-size: 1.4rem; cursor: pointer; transition: color 0.2s; line-height: 1; }
   .modal-close:hover { color: var(--text); }
-
-  .modal h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.6rem;
-    font-weight: 400;
-    color: var(--text);
-    margin-bottom: 6px;
-  }
-  .modal .modal-subtitle {
-    font-size: 0.85rem;
-    color: var(--muted);
-    margin-bottom: 28px;
-  }
-
-  .modal-section {
-    margin-bottom: 24px;
-  }
-  .modal-section h3 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.05rem;
-    font-weight: 400;
-    font-style: italic;
-    color: var(--violet);
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .modal-section p {
-    font-size: 0.9rem;
-    color: #b8b0cc;
-    line-height: 1.7;
-    font-weight: 300;
-  }
-
-  .modal-tip {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 16px 20px;
-    margin-top: 24px;
-    font-size: 0.85rem;
-    color: var(--muted);
-    line-height: 1.6;
-    font-style: italic;
-  }
+  .modal h2 { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 400; color: var(--text); margin-bottom: 6px; }
+  .modal .modal-subtitle { font-size: 0.85rem; color: var(--muted); margin-bottom: 28px; }
+  .modal-section { margin-bottom: 24px; }
+  .modal-section h3 { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 400; font-style: italic; color: var(--violet); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .modal-section p { font-size: 0.9rem; color: #b8b0cc; line-height: 1.7; font-weight: 300; }
+  .modal-tip { background: var(--surface2); border: 1px solid var(--border); border-radius: 16px; padding: 16px 20px; margin-top: 24px; font-size: 0.85rem; color: var(--muted); line-height: 1.6; font-style: italic; }
   .modal-tip strong { color: var(--violet); font-style: normal; }
+
+  .toast {
     position: fixed;
     bottom: 32px;
     left: 50%;
@@ -615,6 +363,18 @@
     white-space: nowrap;
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .section-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .section-title h3 { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 400; color: var(--muted); font-style: italic; }
+  .clear-all { font-size: 0.75rem; color: var(--dim); background: none; border: none; cursor: pointer; font-family: 'Nunito', sans-serif; transition: color 0.2s; }
+  .clear-all:hover { color: var(--pink); }
+  .saved-list { display: flex; flex-direction: column; gap: 10px; }
+  .saved-item { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 18px 20px; display: flex; gap: 14px; align-items: flex-start; animation: fadeUp 0.4s ease; transition: border-color 0.2s; }
+  .saved-item:hover { border-color: var(--border2); }
+  .saved-item p { flex: 1; font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 400; line-height: 1.55; color: #c8c0e0; }
+  .theme-badge { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--violet); opacity: 0.6; margin-top: 6px; font-family: 'Nunito', sans-serif; }
+  .del-item { background: none; border: none; color: var(--dim); cursor: pointer; font-size: 0.9rem; padding: 2px; transition: color 0.2s; flex-shrink: 0; line-height: 1; margin-top: 2px; }
+  .del-item:hover { color: var(--pink); }
 
   @keyframes fadeDown { from { opacity:0; transform:translateY(-24px); } to { opacity:1; transform:none; } }
   @keyframes fadeUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:none; } }
@@ -639,40 +399,34 @@
     <h1>Manifest Your Words</h1>
     <p class="tagline">The app that turns your dreams into daily affirmations —<br>speak them, believe them, live them.</p>
     <button class="how-btn" onclick="openModal()">? How affirmations work</button>
+    <a class="how-btn game-link" href="affirmations-game.html">🎮 Play Affirmation Pairs</a>
   </header>
 
-  <!-- How it works modal -->
   <div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
     <div class="modal">
       <button class="modal-close" onclick="closeModal()">✕</button>
       <h2>How Affirmations Work</h2>
       <p class="modal-subtitle">A simple guide to getting the most from your practice</p>
-
       <div class="modal-section">
         <h3>🧠 What is an affirmation?</h3>
         <p>An affirmation is a positive statement written in the present tense, as if what you want is already true. The idea is to train your mind to believe something before it has fully happened — shifting your thoughts, feelings, and ultimately your actions toward the life you want.</p>
       </div>
-
       <div class="modal-section">
         <h3>✨ Why do they work?</h3>
         <p>Your brain has a system called the Reticular Activating System (RAS) that filters what you notice in the world. When you repeat affirmations regularly, you're essentially programming your RAS to spot opportunities, people, and situations that align with your goals — things you might have overlooked before.</p>
       </div>
-
       <div class="modal-section">
         <h3>🌅 When should I use them?</h3>
         <p>The best times are first thing in the morning before your mind fills with the day's noise, and last thing at night when your subconscious is most receptive. Even just 5 minutes of reading or repeating your affirmation can make a real difference over time.</p>
       </div>
-
       <div class="modal-section">
         <h3>🔁 How do I use this app?</h3>
         <p>Describe what you genuinely want in your life in the box — be as specific or as broad as you like. Press <em>Create New Affirmation</em> to get one tailored to your vision, or <em>Surprise me</em> for a random spark of inspiration. When one resonates, save it and come back to it daily.</p>
       </div>
-
       <div class="modal-section">
         <h3>💛 Tips for best results</h3>
         <p>Say your affirmation out loud if you can. Feel it as you say it — don't just read the words, try to genuinely connect with the emotion behind them. Consistency matters more than perfection. Even on days it feels silly, keep going. The shift happens gradually and then all at once.</p>
       </div>
-
       <div class="modal-tip">
         <strong>Remember:</strong> Affirmations work best alongside action. They open your mind to possibility — but taking small steps toward your vision every day is what makes the magic real.
       </div>
@@ -682,7 +436,6 @@
   <div class="vision-card">
     <label>What do you want in your life?</label>
     <textarea class="vision-textarea" id="visionInput" placeholder="e.g. I want to feel more confident in my career, find inner peace, attract loving relationships, and build healthy habits that stick..."></textarea>
-
     <div class="mood-row">
       <span class="quick-label">Quick add:</span>
       <button class="mood-chip" data-text="more confidence and self-belief">Confidence</button>
@@ -693,17 +446,15 @@
       <button class="mood-chip" data-text="clarity of purpose and direction">Purpose</button>
       <button class="mood-chip" data-text="joy and gratitude every day">Joy</button>
     </div>
-
     <div class="btn-row">
       <button class="btn-ai" id="generateBtn" onclick="generateAI()">
-        <div class="spinner" id="spinner"></div>
         <span id="btnLabel">✦ Create New Affirmation</span>
       </button>
       <button class="btn-random" id="randomBtn" onclick="quickRandom()">✨ Surprise me</button>
     </div>
   </div>
 
-  <div class="result-area" id="resultArea">
+  <div class="result-area">
     <div class="affirmation-card">
       <div class="card-glow"></div>
       <p class="affirmation-text placeholder-text" id="affText">Your affirmation will appear here...</p>
@@ -714,10 +465,6 @@
       <button class="act-btn copy-btn" id="copyBtn" onclick="copyAff()">⎘ Copy Affirmation</button>
       <button class="act-btn share-btn" onclick="shareAff()">↗ Share</button>
       <button class="act-btn speak-btn" id="speakBtn" onclick="toggleSpeak()">🔊 Listen</button>
-    </div>
-    <div class="voice-row">
-      <label class="voice-label" for="voiceSelect">Voice:</label>
-      <select class="voice-select" id="voiceSelect"></select>
     </div>
   </div>
 
@@ -745,8 +492,6 @@
   }
 })();
 
-let currentBatch = [];
-let currentIndex = 0;
 let saved = JSON.parse(localStorage.getItem('bloom_saved_v2') || '[]');
 
 document.querySelectorAll('.mood-chip').forEach(chip => {
@@ -762,33 +507,24 @@ document.querySelectorAll('.mood-chip').forEach(chip => {
   });
 });
 
-// ─── Pure JS Affirmation Engine — no API needed ───────────────────────────
+// ─── Affirmation Engine ───────────────────────────────────────────────────
 
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
-// Vision keyword extractor
 function keywords(vision) {
   const stop = new Set([
     'i','want','to','a','an','the','and','or','in','my','me','more','feel','have',
     'be','of','with','for','that','is','are','it','so','very','really','just','get',
-    'like','love','find','life','live','feel','help','make','also','some','good',
-    'better','feel','able','want','would','could','things','thing','every','each',
-    'more','less','much','many','well','also','even','know','think','need','wish',
-    'hope','feel','seem','keep','start','stop','try','let','put','see','look','come',
-    'this','that','these','those','them','they','their','there','then','than','when',
-    'what','which','who','how','why','where','will','can','may','might','must','shall'
+    'like','love','find','life','live','help','make','also','some','good','better',
+    'able','would','could','things','thing','every','each','less','much','many',
+    'well','even','know','think','need','wish','hope','seem','keep','start','stop',
+    'try','let','put','see','look','come','this','that','these','those','them',
+    'they','their','there','then','than','when','what','which','who','how','why',
+    'where','will','can','may','might','must','shall'
   ]);
-  return vision
-    .toLowerCase()
-    .replace(/[^a-z\s]/g,'')
-    .split(/\s+/)
-    .filter(w =>
-      w.length > 3 &&
-      !stop.has(w) &&
-      !w.endsWith('ly') &&   // removes adverbs: freely, deeply, quickly etc
-      !w.endsWith('ing') &&  // removes gerunds used as verbs: wanting, feeling etc
-      !w.endsWith('ed')      // removes past tense verbs: wanted, needed etc
-    );
+  return vision.toLowerCase().replace(/[^a-z\s]/g,'').split(/\s+/).filter(w =>
+    w.length > 3 && !stop.has(w) && !w.endsWith('ly') && !w.endsWith('ing') && !w.endsWith('ed')
+  );
 }
 
 const themes = [
@@ -797,8 +533,6 @@ const themes = [
   "Alignment","Creativity","Wellness","Gratitude","Manifestation","Connection"
 ];
 
-// Vision templates — each is a complete, grammatically correct sentence
-// kw1, kw2 are keywords from the user's input with safe fallbacks
 const visionTemplates = [
   kw => `I am becoming someone who naturally lives with more ${kw}, and every day I feel this growing within me.`,
   kw => `I have everything I need to build a life full of ${kw}, and I trust myself to create it.`,
@@ -811,13 +545,12 @@ const visionTemplates = [
   kw => `I am deeply aligned with ${kw}, and life continues to show me how real this is.`,
   kw => `I allow ${kw} to fill every corner of my life — I am ready and I am open.`,
   kw => `I am releasing everything that blocks my ${kw}, making space for all that is meant for me.`,
-  kw => `My relationship with ${kw} grows stronger every single day, quietly and powerfully.`,
+  kw => `My connection to ${kw} grows stronger every single day, quietly and powerfully.`,
   kw => `I deserve a life rich with ${kw}, and I take one small step toward it every day.`,
   kw => `I am not waiting for ${kw} — I am living it now, in every choice I make.`,
   kw => `I carry a deep and growing sense of ${kw} within me that no circumstance can take away.`,
 ];
 
-// Random templates — complete, self-contained, grammatically correct
 const randomTemplates = [
   () => `I am exactly where I need to be, and I trust the journey that is unfolding before me.`,
   () => `I choose peace — not because life is perfect, but because I am.`,
@@ -844,33 +577,20 @@ const randomTemplates = [
 function buildVisionAffirmation(vision) {
   const kws = keywords(vision);
   const kw = kws[0] || pick(['confidence','peace','joy','love','abundance','health','growth','clarity']);
-  const template = pick(visionTemplates);
-  const affirmation = template(kw);
-  const theme = pick(themes);
-  return { affirmation, theme };
+  return { affirmation: pick(visionTemplates)(kw), theme: pick(themes) };
 }
 
 function buildRandomAffirmation() {
-  const template = pick(randomTemplates);
-  const affirmation = template();
-  const theme = pick(themes);
-  return { affirmation, theme };
+  return { affirmation: pick(randomTemplates)(), theme: pick(themes) };
 }
 
 function generateAI() {
   const vision = document.getElementById('visionInput').value.trim();
-  if (!vision) {
-    document.getElementById('visionInput').focus();
-    showToast('Tell me what you want in your life ✦');
-    return;
-  }
+  if (!vision) { document.getElementById('visionInput').focus(); showToast('Tell me what you want in your life ✦'); return; }
   showResult(buildVisionAffirmation(vision));
 }
 
-function quickRandom() {
-  showResult(buildRandomAffirmation());
-}
-
+function quickRandom() { showResult(buildRandomAffirmation()); }
 
 function showResult(item) {
   stopSpeaking();
@@ -888,7 +608,7 @@ function showResult(item) {
 function saveCurrentAff() {
   const text = document.getElementById('affText').textContent;
   const theme = document.getElementById('affTheme').textContent;
-  if (!text || saved.find(s => s.affirmation === text)) { showToast('Already saved ✓'); return; }
+  if (!text || text.includes('appear here') || saved.find(s => s.affirmation === text)) { showToast('Already saved ✓'); return; }
   saved.unshift({ affirmation: text, theme });
   localStorage.setItem('bloom_saved_v2', JSON.stringify(saved));
   renderSaved();
@@ -899,34 +619,23 @@ function shareAff() {
   const text = document.getElementById('affText').textContent;
   const theme = document.getElementById('affTheme').textContent;
   if (!text || text.includes('appear here')) { showToast('Generate an affirmation first ✦'); return; }
-
   const shareText = `✨ ${text}\n\n— ${theme} affirmation from Bloom 🌸`;
-
-  // Use native share sheet if available (works great on iPhone!)
   if (navigator.share) {
-    navigator.share({ text: shareText })
-      .then(() => showToast('Shared! 🌸'))
-      .catch(() => {}); // user cancelled — do nothing
+    navigator.share({ text: shareText }).then(() => showToast('Shared! 🌸')).catch(() => {});
   } else {
-    // Desktop fallback — copy to clipboard
-    navigator.clipboard.writeText(shareText).then(() => {
-      showToast('Copied to clipboard — ready to paste & share! ⎘');
-    });
+    navigator.clipboard.writeText(shareText).then(() => showToast('Copied — ready to paste & share! ⎘'));
   }
 }
 
 function copyAff() {
   const text = document.getElementById('affText').textContent;
-  if (!text) return;
+  if (!text || text.includes('appear here')) return;
   navigator.clipboard.writeText(text).then(() => {
     const btn = document.getElementById('copyBtn');
     btn.textContent = '✓ Copied!';
     btn.style.background = 'rgba(251,191,36,0.25)';
     showToast('Copied to clipboard ⎘');
-    setTimeout(() => {
-      btn.textContent = '⎘ Copy Affirmation';
-      btn.style.background = '';
-    }, 2000);
+    setTimeout(() => { btn.textContent = '⎘ Copy Affirmation'; btn.style.background = ''; }, 2000);
   });
 }
 
@@ -958,49 +667,26 @@ function renderSaved() {
   `).join('');
 }
 
-function setLoading(on) {
-  // No-op — generation is instant, no loading needed
-}
-
 // ─── Text-to-Speech ───────────────────────────────────────────────────────
 let isSpeaking = false;
+let bestVoice = null;
 
-function populateVoices() {
-  const select = document.getElementById('voiceSelect');
+function loadBestVoice() {
   const voices = window.speechSynthesis.getVoices();
-  // Only show English voices
-  const englishVoices = voices.filter(v => v.lang.startsWith('en'));
-  select.innerHTML = '';
-  englishVoices.forEach((v, i) => {
-    const opt = document.createElement('option');
-    opt.value = i;
-    opt.textContent = `${v.name} (${v.lang})`;
-    // Pre-select a nice default if available
-    const nice = ['Samantha','Karen','Moira','Tessa','Ava','Allison','Fiona'];
-    if (nice.some(n => v.name.includes(n))) opt.selected = true;
-    select.appendChild(opt);
-  });
+  const preferred = ['Samantha','Karen','Moira','Tessa','Ava','Allison','Fiona','Victoria','Daniel','Martha'];
+  for (const name of preferred) {
+    const match = voices.find(v => v.name.includes(name) && v.lang.startsWith('en'));
+    if (match) { bestVoice = match; return; }
+  }
+  bestVoice = voices.find(v => v.lang.startsWith('en')) || null;
 }
-
-// Voices load async — populate when ready
-window.speechSynthesis.onvoiceschanged = populateVoices;
-populateVoices();
-
-function getSelectedVoice() {
-  const select = document.getElementById('voiceSelect');
-  const voices = window.speechSynthesis.getVoices().filter(v => v.lang.startsWith('en'));
-  return voices[select.selectedIndex] || null;
-}
+window.speechSynthesis.onvoiceschanged = loadBestVoice;
+loadBestVoice();
 
 function toggleSpeak() {
   const text = document.getElementById('affText').textContent;
   const btn = document.getElementById('speakBtn');
-
-  if (!text || text.includes('appear here')) {
-    showToast('Generate an affirmation first ✦');
-    return;
-  }
-
+  if (!text || text.includes('appear here')) { showToast('Generate an affirmation first ✦'); return; }
   if (isSpeaking) {
     window.speechSynthesis.cancel();
     isSpeaking = false;
@@ -1008,46 +694,19 @@ function toggleSpeak() {
     btn.classList.remove('speaking');
     return;
   }
-
-  // Split into sentences so we can add natural pauses between them
-  const sentences = text.match(/[^.!?,]+[.!?,]*/g) || [text];
-
-  let sentenceIndex = 0;
-
+  const sentences = text.match(/[^.!?]+[.!?]*/g) || [text];
+  let idx = 0;
   function speakNext() {
-    if (sentenceIndex >= sentences.length) {
-      isSpeaking = false;
-      btn.textContent = '🔊 Listen';
-      btn.classList.remove('speaking');
-      return;
-    }
-
-    const sentence = sentences[sentenceIndex].trim();
-    if (!sentence) { sentenceIndex++; speakNext(); return; }
-
-    const utterance = new SpeechSynthesisUtterance(sentence);
-    utterance.rate = 0.78;     // gentle pace — not rushed, not too slow
-    utterance.pitch = 1.12;    // warmer, more human feeling
-    utterance.volume = 0.95;   // slightly softer feels more intimate
-
-    const voice = getSelectedVoice();
-    if (voice) utterance.voice = voice;
-
-    utterance.onend = () => {
-      sentenceIndex++;
-      // Natural breath pause between sentences
-      setTimeout(speakNext, 650);
-    };
-
-    utterance.onerror = () => {
-      isSpeaking = false;
-      btn.textContent = '🔊 Listen';
-      btn.classList.remove('speaking');
-    };
-
-    window.speechSynthesis.speak(utterance);
+    if (idx >= sentences.length) { isSpeaking = false; btn.textContent = '🔊 Listen'; btn.classList.remove('speaking'); return; }
+    const s = sentences[idx].trim();
+    if (!s) { idx++; speakNext(); return; }
+    const u = new SpeechSynthesisUtterance(s);
+    u.rate = 0.78; u.pitch = 1.12; u.volume = 0.95;
+    if (bestVoice) u.voice = bestVoice;
+    u.onend = () => { idx++; setTimeout(speakNext, 650); };
+    u.onerror = () => { isSpeaking = false; btn.textContent = '🔊 Listen'; btn.classList.remove('speaking'); };
+    window.speechSynthesis.speak(u);
   }
-
   isSpeaking = true;
   btn.textContent = '⏹ Stop';
   btn.classList.add('speaking');
@@ -1061,17 +720,9 @@ function stopSpeaking() {
   if (btn) { btn.textContent = '🔊 Listen'; btn.classList.remove('speaking'); }
 }
 
-function openModal() {
-  document.getElementById('modalOverlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-function closeModal() {
-  document.getElementById('modalOverlay').classList.remove('open');
-  document.body.style.overflow = '';
-}
-function closeModalOutside(e) {
-  if (e.target === document.getElementById('modalOverlay')) closeModal();
-}
+function openModal() { document.getElementById('modalOverlay').classList.add('open'); document.body.style.overflow = 'hidden'; }
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); document.body.style.overflow = ''; }
+function closeModalOutside(e) { if (e.target === document.getElementById('modalOverlay')) closeModal(); }
 
 function showToast(msg) {
   const t = document.getElementById('toast');
