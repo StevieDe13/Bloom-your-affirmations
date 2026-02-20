@@ -736,7 +736,12 @@ document.getElementById('visionInput').addEventListener('keydown', e => {
 });
 
 renderSaved();
-</script>
+
+// Force fresh reload when navigating back — fixes back-forward cache issue
+window.addEventListener('pageshow', function(e) {
+  if (e.persisted) window.location.reload();
+});
+
 <div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
     <div class="modal">
       <button class="modal-close" onclick="closeModal()">✕</button>
