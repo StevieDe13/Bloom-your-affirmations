@@ -641,80 +641,216 @@ document.querySelectorAll('.mood-chip').forEach(chip => {
 
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
-function keywords(vision) {
-  const stop = new Set([
-    'i','want','to','a','an','the','and','or','in','my','me','more','feel','have',
-    'be','of','with','for','that','is','are','it','so','very','really','just','get',
-    'like','love','find','life','live','help','make','also','some','good','better',
-    'able','would','could','things','thing','every','each','less','much','many',
-    'well','even','know','think','need','wish','hope','seem','keep','start','stop',
-    'try','let','put','see','look','come','this','that','these','those','them',
-    'they','their','there','then','than','when','what','which','who','how','why',
-    'where','will','can','may','might','must','shall','myself','yourself','himself',
-    'herself','itself','ourselves','themselves','into','onto','upon','about','above',
-    'below','through','during','before','after','from','down','over','under','again'
-  ]);
-  return vision.toLowerCase().replace(/[^a-z\s]/g,'').split(/\s+/).filter(w =>
-    w.length > 3 && !stop.has(w) && !w.endsWith('ly') && !w.endsWith('ing') && !w.endsWith('ed')
-  );
+// Theme detection — scan input for signals and match to a theme
+const themeMap = [
+  {
+    theme: 'Confidence',
+    signals: ['confidence','confident','belief','believe','self-esteem','worthy','worth','bold','assertive','strong','courage','courageous','brave','bravery','speak up','voice','doubt','insecure','insecurity'],
+    affirmations: [
+      `I am confident, capable, and worthy of everything I desire — I trust myself completely.`,
+      `I walk through life with quiet confidence, knowing I am enough exactly as I am.`,
+      `I believe in myself deeply, and that belief grows stronger with every step I take.`,
+      `I am becoming bolder every day — my voice matters and I deserve to be heard.`,
+      `I release all self-doubt and step into my power with grace and certainty.`,
+      `I am worthy of love, success, and happiness — I claim all of it without apology.`,
+      `My confidence is unshakeable because it comes from within, not from the approval of others.`,
+    ]
+  },
+  {
+    theme: 'Inner Peace',
+    signals: ['peace','peaceful','calm','calm','anxiety','anxious','stress','stressed','worry','worried','overwhelm','overwhelmed','quiet','stillness','relax','relaxed','tension','nervous','mind','mental'],
+    affirmations: [
+      `I am at peace with who I am and where I am — all is well in my world.`,
+      `I release worry and choose calm — my mind is clear, my heart is still.`,
+      `Peace is my natural state, and I return to it with ease no matter what surrounds me.`,
+      `I breathe in calm and breathe out tension — with every breath I feel more at ease.`,
+      `I am learning to be still, and in that stillness I find everything I need.`,
+      `My mind is quiet, my body is relaxed, and I trust that everything is unfolding perfectly.`,
+      `I choose peace over fear, calm over chaos, and trust over worry — every single day.`,
+    ]
+  },
+  {
+    theme: 'Abundance',
+    signals: ['money','financial','abundance','wealthy','wealth','rich','income','career','job','work','business','success','successful','prosper','prosperity','opportunity','opportunities','earn','earning','afford','debt','bills'],
+    affirmations: [
+      `I am a magnet for abundance — money flows to me easily and frequently.`,
+      `I deserve financial freedom and I am creating it with every choice I make.`,
+      `Abundance is my birthright and I open myself fully to receiving it now.`,
+      `I attract prosperity in expected and unexpected ways — the universe provides for me always.`,
+      `My relationship with money is healthy, positive, and growing stronger every day.`,
+      `I am worthy of great success and I take confident steps toward it every day.`,
+      `Opportunities find me wherever I go — I am open, ready, and grateful for all that comes.`,
+    ]
+  },
+  {
+    theme: 'Love',
+    signals: ['love','relationship','partner','romance','romantic','connection','lonely','loneliness','heart','soulmate','marriage','attract','dating','trust','intimacy','family','friendship','friends','bond'],
+    affirmations: [
+      `I am deeply loved and I attract relationships that are kind, genuine, and nurturing.`,
+      `Love flows to me naturally — I am open to giving and receiving it fully.`,
+      `I deserve a love that is deep, real, and lasting — and I welcome it into my life now.`,
+      `I attract people who see me, value me, and lift me higher every day.`,
+      `My heart is open and I trust that the right connections are already finding their way to me.`,
+      `I am worthy of love exactly as I am — I do not need to change to be deserving of it.`,
+      `The love I give comes back to me multiplied — I am surrounded by warmth and connection.`,
+    ]
+  },
+  {
+    theme: 'Health',
+    signals: ['health','healthy','body','fitness','fit','exercise','weight','energy','energetic','vitality','heal','healing','illness','sick','diet','nutrition','sleep','rest','strong','strength','wellbeing','wellness'],
+    affirmations: [
+      `My body is strong, healthy, and full of energy — I take great care of it every day.`,
+      `I listen to my body with love and give it exactly what it needs to thrive.`,
+      `Every day my health improves — I am healing and growing stronger in every way.`,
+      `I honour my body with nourishing food, joyful movement, and deep, restful sleep.`,
+      `I am grateful for my body and all that it does for me — I treat it with kindness.`,
+      `Vibrant health is my natural state and I return to it with ease and gratitude.`,
+      `I am becoming healthier, stronger, and more energetic with every passing day.`,
+    ]
+  },
+  {
+    theme: 'Purpose',
+    signals: ['purpose','passion','calling','direction','meaning','meaningful','goal','goals','dream','dreams','vision','path','clarity','clear','focus','focused','future','potential','create','creative','creativity','talent','gift'],
+    affirmations: [
+      `I am living my purpose — every day I move closer to the life I was meant to live.`,
+      `My gifts and talents are needed in this world and I share them with confidence.`,
+      `I have a clear vision for my future and I take inspired action toward it every day.`,
+      `I trust the direction my life is taking — everything is leading me somewhere beautiful.`,
+      `I am exactly where I need to be, doing what I am meant to do, becoming who I am meant to become.`,
+      `My dreams are valid, my goals are achievable, and I am more than capable of reaching them.`,
+      `I create a life of meaning and joy — my purpose unfolds naturally as I show up each day.`,
+    ]
+  },
+  {
+    theme: 'Growth',
+    signals: ['grow','growth','learn','learning','improve','improvement','change','better','progress','develop','development','evolve','evolution','transform','transformation','habit','discipline','knowledge','skill','skills','potential'],
+    affirmations: [
+      `I am growing every day — each experience makes me wiser, stronger, and more resilient.`,
+      `I embrace change as an opportunity to become the best version of myself.`,
+      `I am committed to my growth and I show up for myself even when it is hard.`,
+      `Every step forward, no matter how small, is progress — and I celebrate every one.`,
+      `I am not who I was yesterday — I am always evolving into something greater.`,
+      `I welcome challenges because I know they are shaping me into who I am meant to be.`,
+      `I invest in myself every day and the returns are beyond what I can yet imagine.`,
+    ]
+  },
+  {
+    theme: 'Healing',
+    signals: ['heal','healing','trauma','pain','hurt','grief','loss','recover','recovery','past','forgive','forgiveness','letting go','release','move on','broken','wound','wounded','overcome','struggle'],
+    affirmations: [
+      `I am healing — slowly, gently, and completely — and I honour every step of the journey.`,
+      `I release the past with love and make space for a future that is bright and full of possibility.`,
+      `I forgive myself and others freely — this forgiveness sets me free to live fully.`,
+      `My wounds are becoming wisdom and my pain is becoming my greatest source of strength.`,
+      `I am not defined by what happened to me — I am defined by how I rise from it.`,
+      `I give myself permission to heal at my own pace, without judgment or rush.`,
+      `Every day I am releasing what no longer serves me and embracing all that lifts me up.`,
+    ]
+  },
+  {
+    theme: 'Gratitude',
+    signals: ['grateful','gratitude','thankful','thankfulness','appreciate','appreciation','blessed','blessings','joy','joyful','happy','happiness','positive','positivity','abundance','beauty','gift','gifts'],
+    affirmations: [
+      `I am deeply grateful for the beauty in my life — there is always something to appreciate.`,
+      `Gratitude opens my heart and draws more goodness into every corner of my life.`,
+      `I choose to see the gifts in every day — even the small ones are worth celebrating.`,
+      `My life is full of blessings and I take time every day to recognise and appreciate them.`,
+      `Joy is my natural state — I find it in the ordinary moments and let it fill me completely.`,
+      `The more grateful I am, the more I have to be grateful for — abundance multiplies in my life.`,
+      `I wake each morning with a thankful heart and go to bed each night counting my blessings.`,
+    ]
+  },
+  {
+    theme: 'Self-Trust',
+    signals: ['trust','intuition','gut','instinct','decision','decisions','choice','choices','self','authentic','authenticity','true','truth','honest','honesty','know','knowing','certain','certainty','faith'],
+    affirmations: [
+      `I trust myself — my instincts are wise, my choices are sound, and my path is right for me.`,
+      `I honour my intuition and follow it without apology — it always leads me where I need to go.`,
+      `I am the expert on my own life and I make decisions with confidence and clarity.`,
+      `I trust the process of my life — everything is unfolding in perfect timing for me.`,
+      `I know who I am and I stand firmly in that knowledge, no matter what others may think.`,
+      `I am authentic, honest, and true to myself in everything I do — and that is my greatest strength.`,
+      `I have everything I need within me — I trust myself to figure it out as I go.`,
+    ]
+  },
+  {
+    theme: 'Resilience',
+    signals: ['resilience','resilient','strong','strength','overcome','challenge','challenges','difficult','difficulty','hard','tough','bounce','recover','persist','persistence','keep going','never give up','determination','determined'],
+    affirmations: [
+      `I am resilient — I have overcome challenges before and I will overcome this one too.`,
+      `I bend but I do not break — every hardship is making me stronger and more capable.`,
+      `I keep going even when it is hard, because I know that persistence always pays off.`,
+      `I am tougher than any challenge that comes my way — I rise every single time.`,
+      `Difficulties do not define me — how I respond to them does, and I always respond with strength.`,
+      `I trust my ability to handle whatever comes — I have done it before and I will do it again.`,
+      `I am built for this — every obstacle is just a stepping stone on the path to my greatness.`,
+    ]
+  },
+  {
+    theme: 'Freedom',
+    signals: ['free','freedom','independent','independence','control','boundary','boundaries','limit','limits','escape','release','open','liberate','liberation','choice','authentic','own','own path','own life'],
+    affirmations: [
+      `I am free to live life on my own terms — I answer to my own truth and no one else's.`,
+      `I release all that confines me and step boldly into the open, limitless life I deserve.`,
+      `I set healthy boundaries with ease and grace — they protect my freedom and my peace.`,
+      `I am not constrained by my past, my fears, or others' expectations — I am gloriously free.`,
+      `I choose my own path and walk it with courage, curiosity, and complete confidence.`,
+      `Freedom is my birthright — I claim it fully in my thoughts, my choices, and my life.`,
+      `I give myself permission to live exactly as I choose — joyfully, freely, and without apology.`,
+    ]
+  },
+];
+
+const randomAffirmations = [
+  { affirmation: `I am exactly where I need to be, and I trust the journey that is unfolding before me.`, theme: 'Alignment' },
+  { affirmation: `I choose peace — not because life is perfect, but because I deserve it.`, theme: 'Inner Peace' },
+  { affirmation: `I am a magnet for goodness, and wonderful things find their way to me with ease.`, theme: 'Manifestation' },
+  { affirmation: `I am free — free from fear, free to grow, and free to be fully, unapologetically myself.`, theme: 'Freedom' },
+  { affirmation: `I give myself permission to take up space, to be seen, and to shine without apology.`, theme: 'Confidence' },
+  { affirmation: `I am not behind. I am not too late. I am right on time for my own beautiful life.`, theme: 'Self-Trust' },
+  { affirmation: `I trust myself completely — my instincts guide me and my choices serve me well.`, theme: 'Self-Trust' },
+  { affirmation: `I am healing in ways both seen and unseen, and I honour every step of this journey.`, theme: 'Healing' },
+  { affirmation: `I radiate warmth and confidence, and the world around me reflects that back beautifully.`, theme: 'Confidence' },
+  { affirmation: `I deserve deep rest, real love, and a life that feels genuinely mine.`, theme: 'Worthiness' },
+  { affirmation: `I am grateful for who I am today and excited about who I am still becoming.`, theme: 'Gratitude' },
+  { affirmation: `Joy is not something I have to earn — it is my birthright, and I claim it right now.`, theme: 'Joy' },
+  { affirmation: `I attract relationships that nourish me, challenge me, and lift me higher.`, theme: 'Love' },
+  { affirmation: `I am resilient. Every challenge I face is quietly making me wiser and stronger.`, theme: 'Resilience' },
+  { affirmation: `I move through life with grace and ease, and good things come to me naturally.`, theme: 'Alignment' },
+  { affirmation: `My mind is calm, my heart is open, and I am ready for everything that is coming.`, theme: 'Inner Peace' },
+  { affirmation: `I choose to see the beauty in this moment — it is always there if I look for it.`, theme: 'Gratitude' },
+  { affirmation: `I am creative, capable, and full of ideas that have the power to change my world.`, theme: 'Creativity' },
+  { affirmation: `Abundance flows to me in expected and unexpected ways, and I receive it with gratitude.`, theme: 'Abundance' },
+  { affirmation: `I am learning to love myself more fully every single day, and it changes everything.`, theme: 'Self-Love' },
+  { affirmation: `I release what I cannot control and find peace in trusting the process of my life.`, theme: 'Inner Peace' },
+  { affirmation: `I am surrounded by love and everything is working out for my highest good.`, theme: 'Love' },
+  { affirmation: `I honour my journey — every twist, every turn has been leading me somewhere wonderful.`, theme: 'Purpose' },
+  { affirmation: `I am enough. I have always been enough. I will always be enough.`, theme: 'Self-Worth' },
+  { affirmation: `My potential is limitless and I am only just beginning to discover what I am capable of.`, theme: 'Growth' },
+];
+
+function detectTheme(vision) {
+  const input = vision.toLowerCase();
+  let bestMatch = null;
+  let bestScore = 0;
+
+  themeMap.forEach(t => {
+    const score = t.signals.filter(s => input.includes(s)).length;
+    if (score > bestScore) { bestScore = score; bestMatch = t; }
+  });
+
+  return bestMatch;
 }
-
-const themes = [
-  "Inner Peace","Self-Trust","Abundance","Courage","Healing","Joy",
-  "Confidence","Growth","Freedom","Love","Purpose","Resilience",
-  "Alignment","Creativity","Wellness","Gratitude","Manifestation","Connection"
-];
-
-const visionTemplates = [
-  kw => `I am becoming someone who naturally lives with more ${kw}, and every day I feel this growing within me.`,
-  kw => `I have everything I need to build a life full of ${kw}, and I trust myself to create it.`,
-  kw => `I choose ${kw} — it is my natural state, and I return to it with ease.`,
-  kw => `I am worthy of all the ${kw} I desire, and I open myself fully to receiving it now.`,
-  kw => `I radiate ${kw} from the inside out, and it shapes everything I attract into my life.`,
-  kw => `I embrace ${kw} as my birthright — it belongs to me and I step into it fully today.`,
-  kw => `With every breath, I welcome more ${kw} into my life, gently and without resistance.`,
-  kw => `I trust that ${kw} is already flowing toward me, even in ways I cannot yet see.`,
-  kw => `I am deeply aligned with ${kw}, and life continues to show me how real this is.`,
-  kw => `I allow ${kw} to fill every corner of my life — I am ready and I am open.`,
-  kw => `I am releasing everything that blocks my ${kw}, making space for all that is meant for me.`,
-  kw => `My connection to ${kw} grows stronger every single day, quietly and powerfully.`,
-  kw => `I deserve a life rich with ${kw}, and I take one small step toward it every day.`,
-  kw => `I am not waiting for ${kw} — I am living it now, in every choice I make.`,
-  kw => `I carry a deep and growing sense of ${kw} within me that no circumstance can take away.`,
-];
-
-const randomTemplates = [
-  () => `I am exactly where I need to be, and I trust the journey that is unfolding before me.`,
-  () => `I choose peace — not because life is perfect, but because I am.`,
-  () => `I am a magnet for goodness, and wonderful things find their way to me with ease.`,
-  () => `I am free — free from fear, free to grow, and free to be fully, unapologetically myself.`,
-  () => `I give myself permission to take up space, to be seen, and to shine without apology.`,
-  () => `I am not behind. I am not too late. I am right on time for my own beautiful life.`,
-  () => `I trust myself completely — my instincts guide me and my choices serve me well.`,
-  () => `I am healing in ways both seen and unseen, and I honour every step of this journey.`,
-  () => `I radiate warmth and confidence, and the world around me reflects that back beautifully.`,
-  () => `I deserve deep rest, real love, and a life that feels genuinely mine.`,
-  () => `I am grateful for who I am today and excited about who I am still becoming.`,
-  () => `Joy is not something I have to earn — it is my birthright, and I claim it right now.`,
-  () => `I attract relationships that nourish me, challenge me, and lift me higher.`,
-  () => `I am resilient. Every challenge I face is quietly making me wiser and stronger.`,
-  () => `I move through life with grace and ease, and good things come to me naturally.`,
-  () => `My mind is calm, my heart is open, and I am ready for everything that is coming.`,
-  () => `I choose to see the beauty in this moment — it is always there if I look for it.`,
-  () => `I am creative, capable, and full of ideas that have the power to change my world.`,
-  () => `Abundance flows to me in expected and unexpected ways, and I receive it with gratitude.`,
-  () => `I am learning to love myself more fully every single day, and it changes everything.`,
-];
 
 function buildVisionAffirmation(vision) {
-  const kws = keywords(vision);
-  const kw = kws[0] || pick(['confidence','peace','joy','love','abundance','health','growth','clarity']);
-  return { affirmation: pick(visionTemplates)(kw), theme: pick(themes) };
+  const match = detectTheme(vision);
+  if (match) {
+    return { affirmation: pick(match.affirmations), theme: match.theme };
+  }
+  // No theme detected — use a random affirmation
+  return pick(randomAffirmations);
 }
 
-function buildRandomAffirmation() {
-  return { affirmation: pick(randomTemplates)(), theme: pick(themes) };
-}
 
 function generateAI() {
   const vision = document.getElementById('visionInput').value.trim();
@@ -722,7 +858,7 @@ function generateAI() {
   showResult(buildVisionAffirmation(vision));
 }
 
-function quickRandom() { showResult(buildRandomAffirmation()); }
+function quickRandom() { showResult(pick(randomAffirmations)); }
 
 function showResult(item) {
   stopSpeaking();
