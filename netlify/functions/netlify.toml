@@ -1,5 +1,3 @@
 netlify/
   functions/
     speak.js
-netlify.toml
-index.html
