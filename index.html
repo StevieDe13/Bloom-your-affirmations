@@ -799,54 +799,82 @@ function renderSaved() {
   `).join('');
 }
 
-// ─── Text-to-Speech ───────────────────────────────────────────────────────
+// ─── Text-to-Speech (ElevenLabs) ─────────────────────────────────────────
 let isSpeaking = false;
-let bestVoice = null;
+let currentAudio = null;
+const ELEVENLABS_VOICE_ID = 'KmnvDXRA0HU55Q0aqkPG';
 
-function loadBestVoice() {
-  const voices = window.speechSynthesis.getVoices();
-  const preferred = ['Samantha','Karen','Moira','Tessa','Ava','Allison','Fiona','Victoria','Daniel','Martha'];
-  for (const name of preferred) {
-    const match = voices.find(v => v.name.includes(name) && v.lang.startsWith('en'));
-    if (match) { bestVoice = match; return; }
-  }
-  bestVoice = voices.find(v => v.lang.startsWith('en')) || null;
-}
-window.speechSynthesis.onvoiceschanged = loadBestVoice;
-loadBestVoice();
-
-function toggleSpeak() {
+async function toggleSpeak() {
   const text = document.getElementById('affText').textContent;
   const btn = document.getElementById('speakBtn');
   if (!text || text.includes('appear here')) { showToast('Generate an affirmation first ✦'); return; }
+
+  // If already speaking, stop
   if (isSpeaking) {
-    window.speechSynthesis.cancel();
+    stopSpeaking();
+    return;
+  }
+
+  // Start speaking
+  isSpeaking = true;
+  btn.textContent = '⏳ Loading...';
+  btn.classList.add('speaking');
+
+  try {
+    const response = await fetch('/.netlify/functions/speak', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, voiceId: ELEVENLABS_VOICE_ID }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Voice service error');
+    }
+
+    const data = await response.json();
+
+    // Convert base64 to audio and play
+    const audioBytes = atob(data.audio);
+    const arrayBuffer = new ArrayBuffer(audioBytes.length);
+    const view = new Uint8Array(arrayBuffer);
+    for (let i = 0; i < audioBytes.length; i++) {
+      view[i] = audioBytes.charCodeAt(i);
+    }
+    const blob = new Blob([arrayBuffer], { type: 'audio/mpeg' });
+    const url = URL.createObjectURL(blob);
+
+    currentAudio = new Audio(url);
+    currentAudio.onended = () => {
+      isSpeaking = false;
+      btn.textContent = '🔊 Listen';
+      btn.classList.remove('speaking');
+      URL.revokeObjectURL(url);
+    };
+    currentAudio.onerror = () => {
+      isSpeaking = false;
+      btn.textContent = '🔊 Listen';
+      btn.classList.remove('speaking');
+      showToast('Audio error — try again');
+    };
+
+    btn.textContent = '⏹ Stop';
+    currentAudio.play();
+
+  } catch (err) {
     isSpeaking = false;
     btn.textContent = '🔊 Listen';
     btn.classList.remove('speaking');
-    return;
+    showToast('Could not load voice — check connection ✦');
+    console.error('ElevenLabs error:', err);
   }
-  const sentences = text.match(/[^.!?]+[.!?]*/g) || [text];
-  let idx = 0;
-  function speakNext() {
-    if (idx >= sentences.length) { isSpeaking = false; btn.textContent = '🔊 Listen'; btn.classList.remove('speaking'); return; }
-    const s = sentences[idx].trim();
-    if (!s) { idx++; speakNext(); return; }
-    const u = new SpeechSynthesisUtterance(s);
-    u.rate = 0.78; u.pitch = 1.12; u.volume = 0.95;
-    if (bestVoice) u.voice = bestVoice;
-    u.onend = () => { idx++; setTimeout(speakNext, 650); };
-    u.onerror = () => { isSpeaking = false; btn.textContent = '🔊 Listen'; btn.classList.remove('speaking'); };
-    window.speechSynthesis.speak(u);
-  }
-  isSpeaking = true;
-  btn.textContent = '⏹ Stop';
-  btn.classList.add('speaking');
-  speakNext();
 }
 
 function stopSpeaking() {
-  window.speechSynthesis.cancel();
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+    currentAudio = null;
+  }
   isSpeaking = false;
   const btn = document.getElementById('speakBtn');
   if (btn) { btn.textContent = '🔊 Listen'; btn.classList.remove('speaking'); }
