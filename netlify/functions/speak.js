@@ -3,6 +3,12 @@ exports.handler = async function(event) {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
+  const apiKey = process.env.ELEVENLABS_API_KEY;
+  
+  if (!apiKey) {
+    return { statusCode: 500, body: 'API key not found' };
+  }
+
   try {
     const { text, voiceId } = JSON.parse(event.body);
 
@@ -10,14 +16,14 @@ exports.handler = async function(event) {
       return { statusCode: 400, body: 'No text provided' };
     }
 
-    const voice = voiceId || 'EXAVITQu4vr4xnSDxMaL'; // Default: Bella
+    const voice = voiceId || 'KmnvDXRA0HU55Q0aqkPG';
 
     const response = await fetch(
       `https://api.elevenlabs.io/v1/text-to-speech/${voice}`,
       {
         method: 'POST',
         headers: {
-          'xi-api-key': process.env.ELEVENLABS_API_KEY,
+          'xi-api-key': apiKey,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
