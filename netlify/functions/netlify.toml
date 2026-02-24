@@ -1,2 +1,5 @@
-[build]
-  functions = "netlify/functions"
+netlify/
+  functions/
+    speak.js
+netlify.toml
+index.html
