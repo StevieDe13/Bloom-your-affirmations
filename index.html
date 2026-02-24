@@ -416,7 +416,42 @@
   .game-selector label { display:block; font-size:0.75rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--violet); margin-bottom:10px; }
   .game-sel-row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
   .g-select { flex:1; min-width:200px; background:var(--surface2); border:1px solid var(--border2); border-radius:12px; color:var(--text); font-family:'Nunito',sans-serif; font-size:0.9rem; padding:10px 14px; outline:none; cursor:pointer; }
-  .g-no-saved { font-size:0.85rem; color:var(--muted); margin-top:10px; display:none; }
+  .repeat-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 16px;
+    margin-top: 4px;
+  }
+  .repeat-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  .repeat-btn {
+    padding: 7px 16px;
+    border-radius: 100px;
+    border: 1px solid var(--border2);
+    background: var(--surface);
+    color: var(--muted);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .repeat-btn:hover { border-color: rgba(167,139,250,0.5); color: var(--violet); }
+  .repeat-btn.stop-repeat { border-color: rgba(244,114,182,0.4); color: var(--pink); }
+  .repeat-counter {
+    font-size: 0.78rem;
+    color: var(--violet);
+    font-weight: 600;
+    min-width: 60px;
+  }
 
   /* Level cards hub */
   .levels-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin-bottom:28px; }
@@ -592,6 +627,14 @@
       <button class="act-btn copy-btn" id="copyBtn" onclick="copyAff()">⎘ Copy Affirmation</button>
       <button class="act-btn share-btn" onclick="shareAff()">↗ Share</button>
       <button class="act-btn speak-btn" id="speakBtn" onclick="toggleSpeak()">🔊 Listen</button>
+    </div>
+    <div class="repeat-row" id="repeatRow" style="display:none">
+      <span class="repeat-label">Repeat</span>
+      <button class="repeat-btn" onclick="repeatSpeak(10)">× 10</button>
+      <button class="repeat-btn" onclick="repeatSpeak(20)">× 20</button>
+      <button class="repeat-btn" onclick="repeatSpeak(30)">× 30</button>
+      <button class="repeat-btn stop-repeat" id="stopRepeatBtn" onclick="stopSpeaking()" style="display:none">⏹ Stop</button>
+      <span class="repeat-counter" id="repeatCounter"></span>
     </div>
     <div style="text-align:center; margin-bottom: 32px; margin-top: 8px;">
       <button onclick="openGame()" style="display:inline-block; padding:14px 32px; background:linear-gradient(135deg,rgba(251,191,36,0.2),rgba(244,114,182,0.2)); border:1.5px solid rgba(251,191,36,0.5); border-radius:14px; color:#fbbf24; font-family:'Nunito',sans-serif; font-size:1rem; font-weight:700; cursor:pointer; letter-spacing:0.02em;">🎮 Affirmation Games</button>
@@ -870,7 +913,52 @@ function showResult(item) {
     text.classList.remove('placeholder-text');
     theme.textContent = item.theme;
     text.classList.remove('fade');
+    document.getElementById('repeatRow').style.display = 'flex';
+    document.getElementById('repeatCounter').textContent = '';
+    document.getElementById('stopRepeatBtn').style.display = 'none';
   }, 320);
+}
+
+let repeatCount = 0;
+let repeatTotal = 0;
+
+function repeatSpeak(times) {
+  const text = document.getElementById('affText').textContent;
+  if (!text || text.includes('appear here')) { showToast('Generate an affirmation first ✦'); return; }
+  stopSpeaking();
+  repeatTotal = times;
+  repeatCount = 0;
+  document.getElementById('stopRepeatBtn').style.display = 'inline-block';
+  doRepeat(text);
+}
+
+function doRepeat(text) {
+  if (repeatCount >= repeatTotal || !isSpeaking && repeatCount > 0) {
+    if (repeatCount >= repeatTotal) {
+      document.getElementById('repeatCounter').textContent = '✓ Done!';
+      document.getElementById('stopRepeatBtn').style.display = 'none';
+      isSpeaking = false;
+      document.getElementById('speakBtn').textContent = '🔊 Listen';
+      document.getElementById('speakBtn').classList.remove('speaking');
+    }
+    return;
+  }
+  repeatCount++;
+  document.getElementById('repeatCounter').textContent = `${repeatCount} / ${repeatTotal}`;
+  isSpeaking = true;
+  document.getElementById('speakBtn').textContent = '⏹ Stop';
+  document.getElementById('speakBtn').classList.add('speaking');
+
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 0.78; u.pitch = 1.12; u.volume = 0.95;
+  if (bestVoice) u.voice = bestVoice;
+  u.onend = () => {
+    setTimeout(() => {
+      if (isSpeaking) doRepeat(text);
+    }, 800);
+  };
+  u.onerror = () => { stopSpeaking(); };
+  window.speechSynthesis.speak(u);
 }
 
 function saveCurrentAff() {
@@ -984,8 +1072,14 @@ function toggleSpeak() {
 function stopSpeaking() {
   window.speechSynthesis.cancel();
   isSpeaking = false;
+  repeatCount = 0;
+  repeatTotal = 0;
   const btn = document.getElementById('speakBtn');
   if (btn) { btn.textContent = '🔊 Listen'; btn.classList.remove('speaking'); }
+  const stopBtn = document.getElementById('stopRepeatBtn');
+  if (stopBtn) stopBtn.style.display = 'none';
+  const counter = document.getElementById('repeatCounter');
+  if (counter) counter.textContent = '';
 }
 
 function openModal() { document.getElementById('modalOverlay').classList.add('open'); document.body.style.overflow = 'hidden'; }
