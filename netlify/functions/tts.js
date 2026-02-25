@@ -1,58 +1,1869 @@
-exports.handler = async function(event) {
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bloom — Your Affirmations v2.5</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Nunito:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0c1a;
+    --surface: #1a1628;
+    --surface2: #221e33;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --violet: #a78bfa;
+    --violet-soft: rgba(167,139,250,0.15);
+    --pink: #f472b6;
+    --gold: #fbbf24;
+    --text: #f0ebff;
+    --muted: #9590aa;
+    --dim: #5c5870;
   }
 
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+  .star {
+    position: absolute;
+    border-radius: 50%;
+    background: white;
+    animation: twinkle var(--d, 3s) infinite var(--delay, 0s);
+    opacity: 0;
+  }
+  @keyframes twinkle { 0%,100% { opacity: 0; } 50% { opacity: var(--op, 0.6); } }
+
+  .orb { position: fixed; border-radius: 50%; filter: blur(100px); pointer-events: none; z-index: 0; }
+  .orb-1 { width: 500px; height: 500px; background: rgba(139,92,246,0.18); top: -150px; right: -100px; }
+  .orb-2 { width: 400px; height: 400px; background: rgba(236,72,153,0.12); bottom: -100px; left: -80px; }
+  .orb-3 { width: 250px; height: 250px; background: rgba(251,191,36,0.08); top: 50%; left: 50%; transform: translate(-50%,-50%); }
+
+  .container { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; padding: 64px 24px 100px; }
+
+  header { text-align: center; margin-bottom: 56px; animation: fadeDown 0.9s ease both; }
+
+  .app-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, rgba(167,139,250,0.2), rgba(244,114,182,0.2));
+    border: 1px solid rgba(167,139,250,0.4);
+    border-radius: 100px;
+    padding: 6px 18px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--violet);
+    margin-bottom: 16px;
+  }
+
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.4rem, 5.5vw, 3.4rem);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    background: linear-gradient(135deg, #e2d9f3 0%, #a78bfa 50%, #f472b6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .tagline {
+    margin-top: 12px;
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--muted);
+    letter-spacing: 0.01em;
+    line-height: 1.6;
+  }
+
+  .how-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 16px;
+    padding: 8px 18px;
+    border-radius: 100px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.03em;
+  }
+  .how-btn:hover { color: var(--violet); border-color: rgba(167,139,250,0.4); }
+
+  .vision-card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 24px;
+    padding: 36px;
+    margin-bottom: 24px;
+    animation: fadeUp 0.9s 0.1s ease both;
+    box-shadow: 0 4px 40px rgba(0,0,0,0.4);
+  }
+  .vision-card label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--violet);
+    margin-bottom: 12px;
+  }
+  .vision-textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px 20px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    color: var(--text);
+    resize: none;
+    height: 110px;
+    outline: none;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    line-height: 1.6;
+  }
+  .vision-textarea::placeholder { color: var(--dim); }
+  .vision-textarea:focus { border-color: rgba(167,139,250,0.4); box-shadow: 0 0 0 3px rgba(167,139,250,0.08); }
+
+  .mood-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; margin-bottom: 20px; align-items: center; }
+  .quick-label { font-size: 0.75rem; color: var(--dim); margin-right: 4px; }
+  .mood-chip {
+    padding: 6px 16px;
+    border-radius: 100px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'Nunito', sans-serif;
+  }
+  .mood-chip:hover { border-color: rgba(167,139,250,0.4); color: var(--violet); }
+  .mood-chip.active { background: var(--violet-soft); border-color: rgba(167,139,250,0.5); color: var(--violet); }
+
+  .btn-row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn-ai {
+    flex: 1;
+    min-width: 180px;
+    padding: 14px 24px;
+    border-radius: 14px;
+    border: none;
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: white;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 24px rgba(124,58,237,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn-ai:hover { transform: translateY(-2px); box-shadow: 0 6px 30px rgba(124,58,237,0.5); }
+
+  .btn-random {
+    padding: 14px 22px;
+    border-radius: 14px;
+    border: 1px solid var(--border2);
+    background: var(--surface2);
+    color: var(--muted);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    white-space: nowrap;
+  }
+  .btn-random:hover { border-color: rgba(244,114,182,0.4); color: var(--pink); }
+
+  .result-area { animation: fadeUp 0.9s 0.2s ease both; }
+
+  .affirmation-card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 24px;
+    padding: 48px 40px;
+    text-align: center;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 40px rgba(0,0,0,0.4);
+    position: relative;
+    overflow: hidden;
+  }
+  .affirmation-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 24px;
+    background: linear-gradient(135deg, rgba(167,139,250,0.04), rgba(244,114,182,0.04));
+    pointer-events: none;
+  }
+  .card-glow {
+    position: absolute;
+    top: 0; left: 50%; transform: translateX(-50%);
+    width: 200px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--violet), transparent);
+  }
+
+  .affirmation-text {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.3rem, 3vw, 1.75rem);
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--text);
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    position: relative;
+    z-index: 1;
+  }
+  .affirmation-text.fade { opacity: 0; transform: translateY(10px); }
+  .affirmation-text.placeholder-text { color: var(--dim); font-style: italic; font-size: 1.1rem; }
+
+  .affirmation-theme {
+    margin-top: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--violet);
+    opacity: 0.7;
+  }
+
+  .card-actions { display: flex; justify-content: center; gap: 12px; margin-bottom: 40px; flex-wrap: wrap; }
+  .act-btn {
+    padding: 10px 20px;
+    border-radius: 100px;
+    border: 1px solid var(--border2);
+    background: var(--surface);
+    color: var(--muted);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .act-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+  .act-btn.save-btn:hover { color: var(--pink); border-color: rgba(244,114,182,0.4); }
+  .act-btn.copy-btn {
+    background: rgba(251,191,36,0.12);
+    border: 1.5px solid rgba(251,191,36,0.45);
+    color: var(--gold);
+    font-weight: 600;
+    padding: 11px 26px;
+    font-size: 0.88rem;
+    box-shadow: 0 0 16px rgba(251,191,36,0.1);
+  }
+  .act-btn.copy-btn:hover { background: rgba(251,191,36,0.22); border-color: rgba(251,191,36,0.7); box-shadow: 0 0 24px rgba(251,191,36,0.2); transform: translateY(-1px); }
+  .act-btn.share-btn {
+    background: rgba(52,211,153,0.1);
+    border: 1.5px solid rgba(52,211,153,0.4);
+    color: #34d399;
+    font-weight: 600;
+    padding: 11px 26px;
+    font-size: 0.88rem;
+  }
+  .act-btn.share-btn:hover { background: rgba(52,211,153,0.2); border-color: rgba(52,211,153,0.7); transform: translateY(-1px); }
+  .act-btn.speak-btn {
+    background: rgba(167,139,250,0.12);
+    border: 1.5px solid rgba(167,139,250,0.4);
+    color: var(--violet);
+    font-weight: 600;
+    padding: 11px 26px;
+    font-size: 0.88rem;
+    box-shadow: 0 0 16px rgba(167,139,250,0.08);
+  }
+  .act-btn.speak-btn:hover { background: rgba(167,139,250,0.22); border-color: rgba(167,139,250,0.7); transform: translateY(-1px); }
+  .act-btn.speak-btn.speaking { background: rgba(167,139,250,0.25); border-color: var(--violet); animation: pulse-speak 1.5s infinite; }
+  @keyframes pulse-speak { 0%,100% { box-shadow: 0 0 16px rgba(167,139,250,0.2); } 50% { box-shadow: 0 0 32px rgba(167,139,250,0.5); } }
+
+  .divider { height: 1px; background: var(--border); margin: 40px 0; }
+
+  .act-btn.game-btn {
+    background: linear-gradient(135deg, rgba(251,191,36,0.15), rgba(244,114,182,0.15));
+    border: 1.5px solid rgba(251,191,36,0.4);
+    color: var(--gold);
+    font-weight: 600;
+    padding: 11px 26px;
+    font-size: 0.88rem;
+    text-decoration: none;
+  }
+  .act-btn.game-btn:hover { background: rgba(251,191,36,0.25); border-color: rgba(251,191,36,0.7); transform: translateY(-1px); }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 28px;
+    padding: 40px 36px;
+    max-width: 540px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+    position: relative;
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-close { position: absolute; top: 16px; right: 20px; background: none; border: none; color: var(--dim); font-size: 1.4rem; cursor: pointer; transition: color 0.2s; line-height: 1; }
+  .modal-close:hover { color: var(--text); }
+  .modal h2 { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 400; color: var(--text); margin-bottom: 6px; }
+  .modal .modal-subtitle { font-size: 0.85rem; color: var(--muted); margin-bottom: 28px; }
+  .modal-section { margin-bottom: 24px; }
+  .modal-section h3 { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 400; font-style: italic; color: var(--violet); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .modal-section p { font-size: 0.9rem; color: #b8b0cc; line-height: 1.7; font-weight: 300; }
+  .modal-tip { background: var(--surface2); border: 1px solid var(--border); border-radius: 16px; padding: 16px 20px; margin-top: 24px; font-size: 0.85rem; color: var(--muted); line-height: 1.6; font-style: italic; }
+  .modal-tip strong { color: var(--violet); font-style: normal; }
+
+  /* Fixed floating game button — always visible */
+  .float-game-btn {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 999;
+    padding: 14px 22px;
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    border: none;
+    border-radius: 100px;
+    color: white;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 4px 24px rgba(124,58,237,0.5);
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .float-game-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 32px rgba(124,58,237,0.6); }
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    padding: 12px 24px;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none;
+    z-index: 100;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .section-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .section-title h3 { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 400; color: var(--muted); font-style: italic; }
+  .clear-all { font-size: 0.75rem; color: var(--dim); background: none; border: none; cursor: pointer; font-family: 'Nunito', sans-serif; transition: color 0.2s; }
+  .clear-all:hover { color: var(--pink); }
+  .saved-list { display: flex; flex-direction: column; gap: 10px; }
+  .saved-item { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 18px 20px; display: flex; gap: 14px; align-items: flex-start; animation: fadeUp 0.4s ease; transition: border-color 0.2s; }
+  .saved-item:hover { border-color: var(--border2); }
+  .saved-item p { flex: 1; font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 400; line-height: 1.55; color: #c8c0e0; }
+  .theme-badge { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--violet); opacity: 0.6; margin-top: 6px; font-family: 'Nunito', sans-serif; }
+  .del-item { background: none; border: none; color: var(--dim); cursor: pointer; font-size: 0.9rem; padding: 2px; transition: color 0.2s; flex-shrink: 0; line-height: 1; margin-top: 2px; }
+  .del-item:hover { color: var(--pink); }
+
+  /* ── Game Overlay ── */
+  .game-overlay { position:fixed; inset:0; background:var(--bg); z-index:300; overflow-y:auto; opacity:0; pointer-events:none; transform:translateY(30px); transition:opacity 0.35s ease,transform 0.35s ease; }
+  .game-overlay.open { opacity:1; pointer-events:all; transform:translateY(0); }
+  .game-container { max-width:800px; margin:0 auto; padding:36px 20px 80px; }
+  .game-back-btn { display:inline-flex; align-items:center; gap:6px; padding:8px 18px; border-radius:100px; border:1px solid var(--border2); background:transparent; color:var(--muted); font-family:'Nunito',sans-serif; font-size:0.82rem; font-weight:500; cursor:pointer; transition:all 0.2s; margin-bottom:18px; }
+  .game-back-btn:hover { color:var(--violet); border-color:rgba(167,139,250,0.4); }
+  .game-badge { display:inline-block; background:linear-gradient(135deg,rgba(251,191,36,0.2),rgba(244,114,182,0.2)); border:1px solid rgba(251,191,36,0.4); border-radius:100px; padding:5px 16px; font-size:0.72rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--gold); margin-bottom:10px; }
+  .game-hub-title { font-family:'Playfair Display',serif; font-size:clamp(1.8rem,4vw,2.4rem); font-weight:400; background:linear-gradient(135deg,#e2d9f3 0%,#a78bfa 50%,#f472b6 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:6px; }
+  .game-hub-sub { font-size:0.88rem; color:var(--muted); margin-bottom:24px; line-height:1.6; }
+
+  /* Affirmation selector */
+  .game-selector { background:var(--surface); border:1px solid var(--border2); border-radius:20px; padding:22px 24px; margin-bottom:28px; box-shadow:0 4px 32px rgba(0,0,0,0.35); }
+  .game-selector label { display:block; font-size:0.75rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--violet); margin-bottom:10px; }
+  .game-sel-row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .g-select { flex:1; min-width:200px; background:var(--surface2); border:1px solid var(--border2); border-radius:12px; color:var(--text); font-family:'Nunito',sans-serif; font-size:0.9rem; padding:10px 14px; outline:none; cursor:pointer; }
+  .repeat-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 16px;
+    margin-top: 4px;
+  }
+  .repeat-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  .repeat-btn {
+    padding: 7px 16px;
+    border-radius: 100px;
+    border: 1px solid var(--border2);
+    background: var(--surface);
+    color: var(--muted);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .repeat-btn:hover { border-color: rgba(167,139,250,0.5); color: var(--violet); }
+  .repeat-btn.stop-repeat { border-color: rgba(244,114,182,0.4); color: var(--pink); }
+  .repeat-counter {
+    font-size: 0.78rem;
+    color: var(--violet);
+    font-weight: 600;
+    min-width: 60px;
+  }
+
+  /* Level cards hub */
+  .levels-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin-bottom:28px; }
+  .level-card { background:var(--surface); border:1px solid var(--border2); border-radius:18px; padding:22px 20px; cursor:pointer; transition:all 0.25s ease; text-align:center; position:relative; overflow:hidden; }
+  .level-card:hover { transform:translateY(-3px); box-shadow:0 8px 32px rgba(0,0,0,0.4); border-color:rgba(167,139,250,0.4); }
+  .level-card.locked { opacity:0.45; cursor:not-allowed; }
+  .level-card.locked:hover { transform:none; box-shadow:none; }
+  .level-card.completed { border-color:rgba(52,211,153,0.4); }
+  .level-card.completed::after { content:'✓'; position:absolute; top:10px; right:14px; color:#34d399; font-size:0.85rem; font-weight:700; }
+  .level-emoji { font-size:2rem; margin-bottom:8px; }
+  .level-num { font-size:0.68rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--dim); margin-bottom:4px; }
+  .level-name { font-family:'Playfair Display',serif; font-size:1.05rem; font-weight:400; color:var(--text); margin-bottom:6px; }
+  .level-desc { font-size:0.78rem; color:var(--muted); line-height:1.5; }
+  .level-lock { font-size:0.72rem; color:var(--dim); margin-top:8px; }
+
+  /* Active game area */
+  .g-game-panel { display:none; }
+  .g-game-panel.active { display:block; }
+  .g-panel-header { display:flex; align-items:center; gap:12px; margin-bottom:20px; }
+  .g-panel-back { background:none; border:1px solid var(--border2); border-radius:100px; color:var(--muted); font-family:'Nunito',sans-serif; font-size:0.8rem; padding:7px 16px; cursor:pointer; transition:all 0.2s; }
+  .g-panel-back:hover { color:var(--violet); border-color:rgba(167,139,250,0.4); }
+  .g-panel-title { font-family:'Playfair Display',serif; font-size:1.3rem; font-weight:400; color:var(--text); }
+  .g-panel-emoji { font-size:1.4rem; }
+
+  /* Stats bar */
+  .g-stats { display:flex; justify-content:center; gap:16px; margin-bottom:16px; flex-wrap:wrap; }
+  .g-stat { text-align:center; background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:10px 18px; min-width:75px; }
+  .g-stat-val { font-family:'Playfair Display',serif; font-size:1.3rem; color:var(--violet); line-height:1; }
+  .g-stat-label { font-size:0.65rem; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--dim); margin-top:3px; }
+
+  /* Affirmation progress display */
+  .g-aff-display { background:var(--surface); border:1px solid var(--border2); border-radius:16px; padding:16px 22px; text-align:center; margin-bottom:16px; min-height:58px; display:flex; align-items:center; justify-content:center; }
+  .g-aff-display p { font-family:'Playfair Display',serif; font-size:clamp(0.88rem,2vw,1.05rem); font-style:italic; color:var(--muted); line-height:1.55; }
+  .g-aff-display p span.revealed { color:var(--violet); font-style:normal; font-weight:500; }
+
+  /* ── Level 1: Pairs ── */
+  .g-board { display:grid; gap:10px; justify-content:center; margin-bottom:24px; }
+  .g-card-wrap { perspective:600px; }
+  .g-card { width:100%; aspect-ratio:1; position:relative; transform-style:preserve-3d; transition:transform 0.45s cubic-bezier(0.175,0.885,0.32,1.275); cursor:pointer; border-radius:14px; }
+  .g-card.flipped { transform:rotateY(180deg); }
+  .g-card.matched { transform:rotateY(180deg); cursor:default; }
+  .g-card-face { position:absolute; inset:0; border-radius:14px; display:flex; align-items:center; justify-content:center; backface-visibility:hidden; -webkit-backface-visibility:hidden; padding:6px; }
+  .g-card-front { background:var(--surface); border:1px solid var(--border2); box-shadow:0 2px 12px rgba(0,0,0,0.3); transition:border-color 0.2s,box-shadow 0.2s; }
+  .g-card-wrap:hover .g-card:not(.flipped):not(.matched) .g-card-front { border-color:rgba(167,139,250,0.4); box-shadow:0 0 20px rgba(167,139,250,0.15); }
+  .g-card-front-inner { width:32px; height:32px; background:var(--violet-soft); border:1px solid rgba(167,139,250,0.25); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.85rem; color:rgba(167,139,250,0.5); }
+  .g-card-back { background:linear-gradient(135deg,#2d1f5e,#1e1535); border:1.5px solid rgba(167,139,250,0.35); transform:rotateY(180deg); text-align:center; }
+  .g-card-back span { font-family:'Playfair Display',serif; font-size:clamp(0.6rem,1.6vw,0.85rem); color:var(--text); line-height:1.3; word-break:break-word; }
+  .g-card.matched .g-card-back { background:linear-gradient(135deg,#1a3a2a,#122b1e); border-color:rgba(52,211,153,0.5); }
+  .g-card.matched .g-card-back span { color:#34d399; }
+  .g-card.wrong .g-card-back { animation:gWrongFlash 0.5s ease; }
+  @keyframes gWrongFlash { 0%,100%{border-color:rgba(167,139,250,0.35)} 50%{border-color:rgba(244,114,182,0.7);box-shadow:0 0 28px rgba(244,114,182,0.3);} }
+
+  /* ── Level 2: Scrambled Words ── */
+  .scramble-area { display:flex; flex-direction:column; gap:16px; align-items:center; margin-bottom:24px; }
+  .scramble-words { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; padding:20px; background:var(--surface2); border-radius:16px; min-height:80px; align-items:center; }
+  .scramble-slot { min-height:60px; padding:12px 16px; background:var(--surface); border:1.5px dashed var(--border2); border-radius:14px; display:flex; flex-wrap:wrap; gap:8px; justify-content:center; align-items:center; width:100%; }
+  .word-tile { padding:8px 16px; background:linear-gradient(135deg,#2d1f5e,#1e1535); border:1px solid rgba(167,139,250,0.35); border-radius:10px; font-family:'Playfair Display',serif; font-size:0.9rem; color:var(--text); cursor:pointer; transition:all 0.2s; user-select:none; }
+  .word-tile:hover { border-color:rgba(167,139,250,0.7); transform:translateY(-2px); box-shadow:0 4px 16px rgba(167,139,250,0.2); }
+  .word-tile.placed { background:linear-gradient(135deg,#1a3a2a,#122b1e); border-color:rgba(52,211,153,0.5); color:#34d399; }
+  .word-tile.wrong-place { animation:wrongPlace 0.4s ease; }
+  @keyframes wrongPlace { 0%,100%{border-color:rgba(167,139,250,0.35)} 50%{border-color:rgba(244,114,182,0.8);} }
+  .scramble-check-btn { padding:12px 32px; border-radius:12px; border:none; background:linear-gradient(135deg,#7c3aed,#a855f7); color:white; font-family:'Nunito',sans-serif; font-size:0.9rem; font-weight:700; cursor:pointer; transition:all 0.25s; box-shadow:0 4px 20px rgba(124,58,237,0.35); }
+  .scramble-check-btn:hover { transform:translateY(-2px); }
+  .scramble-hint { font-size:0.82rem; color:var(--dim); margin-top:6px; text-align:center; }
+
+  /* ── Level 3: Fill in the Blank ── */
+  .fitb-sentence { font-family:'Playfair Display',serif; font-size:clamp(1rem,2.5vw,1.25rem); color:var(--text); line-height:1.8; text-align:center; margin-bottom:20px; padding:20px; background:var(--surface); border:1px solid var(--border2); border-radius:16px; }
+  .fitb-blank { display:inline-block; min-width:100px; border-bottom:2px solid var(--violet); color:var(--violet); font-weight:500; padding:0 8px; }
+  .fitb-options { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:20px; }
+  .fitb-opt { padding:10px 22px; border-radius:10px; border:1px solid var(--border2); background:var(--surface2); color:var(--muted); font-family:'Nunito',sans-serif; font-size:0.9rem; font-weight:500; cursor:pointer; transition:all 0.2s; }
+  .fitb-opt:hover { border-color:rgba(167,139,250,0.5); color:var(--violet); }
+  .fitb-opt.correct { background:linear-gradient(135deg,#1a3a2a,#122b1e); border-color:rgba(52,211,153,0.5); color:#34d399; }
+  .fitb-opt.wrong { background:rgba(244,114,182,0.1); border-color:rgba(244,114,182,0.5); color:var(--pink); animation:shake 0.4s ease; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+  .fitb-progress { font-size:0.82rem; color:var(--dim); text-align:center; margin-bottom:16px; }
+
+  /* ── Level 4: Beat the Clock ── */
+  .btc-flash { font-family:'Playfair Display',serif; font-size:clamp(1.1rem,2.8vw,1.4rem); font-style:italic; color:var(--text); line-height:1.6; text-align:center; padding:28px 24px; background:var(--surface); border:1px solid var(--border2); border-radius:18px; margin-bottom:16px; transition:opacity 0.4s ease; }
+  .btc-flash.hidden { opacity:0; }
+  .btc-countdown { font-family:'Playfair Display',serif; font-size:3rem; color:var(--violet); text-align:center; margin:10px 0; font-weight:400; }
+  .btc-input { width:100%; background:var(--surface2); border:1.5px solid var(--border2); border-radius:14px; padding:16px 20px; font-family:'Nunito',sans-serif; font-size:1rem; color:var(--text); outline:none; resize:none; height:100px; line-height:1.6; transition:border-color 0.25s; margin-bottom:12px; }
+  .btc-input:focus { border-color:rgba(167,139,250,0.5); }
+  .btc-input.correct { border-color:rgba(52,211,153,0.6); }
+  .btc-submit { padding:12px 32px; border-radius:12px; border:none; background:linear-gradient(135deg,#7c3aed,#a855f7); color:white; font-family:'Nunito',sans-serif; font-size:0.9rem; font-weight:700; cursor:pointer; transition:all 0.25s; box-shadow:0 4px 20px rgba(124,58,237,0.35); width:100%; }
+  .btc-submit:hover { transform:translateY(-2px); }
+  .btc-score { font-size:0.88rem; color:var(--muted); text-align:center; margin-top:10px; }
+
+  /* ── Level 5: Word Balloons ── */
+  .balloons-area { position:relative; height:320px; background:var(--surface); border:1px solid var(--border2); border-radius:18px; overflow:hidden; margin-bottom:16px; }
+  .balloon { position:absolute; padding:10px 18px; background:linear-gradient(135deg,#2d1f5e,#1e1535); border:1.5px solid rgba(167,139,250,0.4); border-radius:100px; font-family:'Playfair Display',serif; font-size:0.88rem; color:var(--text); cursor:pointer; transition:transform 0.2s,border-color 0.2s; user-select:none; animation:float var(--fd,4s) ease-in-out infinite var(--fdelay,0s); }
+  .balloon:hover { transform:scale(1.1); border-color:rgba(167,139,250,0.8); }
+  .balloon.next-word { border-color:rgba(251,191,36,0.6); color:var(--gold); box-shadow:0 0 16px rgba(251,191,36,0.2); animation:float var(--fd,4s) ease-in-out infinite var(--fdelay,0s), glowPulse 1.5s infinite; }
+  @keyframes glowPulse { 0%,100%{box-shadow:0 0 12px rgba(251,191,36,0.2)} 50%{box-shadow:0 0 28px rgba(251,191,36,0.5)} }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+  .balloon.tapped { animation:pop 0.3s ease forwards; }
+  @keyframes pop { 0%{transform:scale(1)} 50%{transform:scale(1.3)} 100%{transform:scale(0);opacity:0} }
+  .balloon.wrong-tap { animation:wrongTap 0.4s ease; }
+  @keyframes wrongTap { 0%,100%{border-color:rgba(167,139,250,0.4)} 50%{border-color:rgba(244,114,182,0.8);box-shadow:0 0 20px rgba(244,114,182,0.3);} }
+  .balloon-hint { font-size:0.8rem; color:var(--dim); text-align:center; margin-bottom:12px; }
+  .next-word-label { font-size:0.75rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--gold); text-align:center; margin-bottom:10px; }
+  .next-word-display { font-family:'Playfair Display',serif; font-size:1.1rem; color:var(--gold); text-align:center; padding:10px 20px; background:rgba(251,191,36,0.08); border:1px solid rgba(251,191,36,0.3); border-radius:12px; margin-bottom:14px; }
+
+  /* ── Win screen (shared) ── */
+  .g-win { display:none; text-align:center; background:var(--surface); border:1px solid var(--border2); border-radius:24px; padding:36px 24px; margin-top:16px; }
+  .g-win.show { display:block; animation:popIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275) both; }
+  @keyframes popIn { from{opacity:0;transform:scale(0.85)} to{opacity:1;transform:scale(1)} }
+  .g-win h3 { font-family:'Playfair Display',serif; font-size:1.6rem; font-weight:400; background:linear-gradient(135deg,#e2d9f3,#a78bfa,#f472b6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin:10px 0; }
+  .g-win-aff { font-family:'Playfair Display',serif; font-size:clamp(0.92rem,2.2vw,1.15rem); font-style:italic; color:var(--text); line-height:1.6; margin:14px 0; padding:16px 20px; background:linear-gradient(135deg,rgba(167,139,250,0.08),rgba(244,114,182,0.08)); border-radius:14px; border:1px solid rgba(167,139,250,0.2); }
+  .g-win-btns { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:18px; }
+  .g-win-btn { padding:12px 24px; border-radius:12px; border:none; background:linear-gradient(135deg,#7c3aed,#a855f7); color:white; font-family:'Nunito',sans-serif; font-size:0.88rem; font-weight:700; cursor:pointer; transition:all 0.25s; box-shadow:0 4px 20px rgba(124,58,237,0.35); }
+  .g-win-btn:hover { transform:translateY(-2px); }
+  .g-win-btn.sec { background:var(--surface2); border:1px solid var(--border2); color:var(--muted); box-shadow:none; }
+  .g-win-btn.sec:hover { color:var(--text); transform:none; }
+  .g-play-btn { padding:11px 28px; border-radius:12px; border:none; background:linear-gradient(135deg,#7c3aed,#a855f7); color:white; font-family:'Nunito',sans-serif; font-size:0.9rem; font-weight:700; cursor:pointer; transition:all 0.25s; box-shadow:0 4px 20px rgba(124,58,237,0.35); white-space:nowrap; }
+  .g-play-btn:hover { transform:translateY(-2px); }
+
+  @keyframes fadeDown { from { opacity:0; transform:translateY(-24px); } to { opacity:1; transform:none; } }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:none; } }
+
+  @media (max-width: 520px) {
+    .vision-card { padding: 24px 20px; }
+    .affirmation-card { padding: 36px 24px; }
+    .btn-ai { min-width: 140px; }
+    .levels-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<div class="container">
+  <header>
+    <div class="app-badge">✦ Daily Affirmations App</div>
+    <h1>Manifest Your Words</h1>
+    <p class="tagline">The app that turns your dreams into daily affirmations —<br>speak them, believe them, live them.</p>
+    <button class="how-btn" onclick="openModal()">? How affirmations work</button>
+    <button class="how-btn" onclick="openGame()" style="margin-left:8px; background:linear-gradient(135deg,rgba(251,191,36,0.15),rgba(244,114,182,0.15)); border-color:rgba(251,191,36,0.4); color:var(--gold);">🎮 Affirmation Games</button>
+  </header>
+
+  <div class="vision-card">
+    <label>What do you want in your life?</label>
+    <textarea class="vision-textarea" id="visionInput" placeholder="e.g. I want to feel more confident in my career, find inner peace, attract loving relationships, and build healthy habits that stick..."></textarea>
+    <div class="mood-row">
+      <span class="quick-label">Quick add:</span>
+      <button class="mood-chip" data-text="more confidence and self-belief">Confidence</button>
+      <button class="mood-chip" data-text="inner peace and a calm mind">Peace</button>
+      <button class="mood-chip" data-text="financial abundance and security">Abundance</button>
+      <button class="mood-chip" data-text="deeper, loving relationships">Love</button>
+      <button class="mood-chip" data-text="better health and energy">Health</button>
+      <button class="mood-chip" data-text="clarity of purpose and direction">Purpose</button>
+      <button class="mood-chip" data-text="joy and gratitude every day">Joy</button>
+    </div>
+    <div class="btn-row">
+      <button class="btn-ai" id="generateBtn" onclick="generateAI()">
+        <span id="btnLabel">✦ Create New Affirmation</span>
+      </button>
+      <button class="btn-random" id="randomBtn" onclick="quickRandom()">✨ Surprise me</button>
+    </div>
+  </div>
+
+  <div class="result-area">
+    <div class="affirmation-card">
+      <div class="card-glow"></div>
+      <p class="affirmation-text placeholder-text" id="affText">Your affirmation will appear here...</p>
+      <p class="affirmation-theme" id="affTheme"></p>
+    </div>
+    <div class="card-actions">
+      <button class="act-btn save-btn" onclick="saveCurrentAff()">♡ Save</button>
+      <button class="act-btn copy-btn" id="copyBtn" onclick="copyAff()">⎘ Copy Affirmation</button>
+      <button class="act-btn share-btn" onclick="shareAff()">↗ Share</button>
+      <button class="act-btn speak-btn" id="speakBtn" onclick="toggleSpeak()">🔊 Listen</button>
+    </div>
+    <div class="repeat-row" id="repeatRow" style="display:none">
+      <span class="repeat-label">Repeat</span>
+      <button class="repeat-btn" onclick="repeatSpeak(10)">× 10</button>
+      <button class="repeat-btn" onclick="repeatSpeak(20)">× 20</button>
+      <button class="repeat-btn" onclick="repeatSpeak(30)">× 30</button>
+      <button class="repeat-btn stop-repeat" id="stopRepeatBtn" onclick="stopSpeaking()" style="display:none">⏹ Stop</button>
+      <span class="repeat-counter" id="repeatCounter"></span>
+    </div>
+    <div style="text-align:center; margin-bottom: 32px; margin-top: 8px;">
+      <button onclick="openGame()" style="display:inline-block; padding:14px 32px; background:linear-gradient(135deg,rgba(251,191,36,0.2),rgba(244,114,182,0.2)); border:1.5px solid rgba(251,191,36,0.5); border-radius:14px; color:#fbbf24; font-family:'Nunito',sans-serif; font-size:1rem; font-weight:700; cursor:pointer; letter-spacing:0.02em;">🎮 Affirmation Games</button>
+    </div>
+  </div>
+
+  <div class="saved-section" id="savedSection" style="display:none">
+    <div class="divider"></div>
+    <div class="section-title">
+      <h3>Your Collection</h3>
+      <button class="clear-all" onclick="clearAll()">Clear all</button>
+    </div>
+    <div class="saved-list" id="savedList"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function() {
+  const container = document.getElementById('stars');
+  for (let i = 0; i < 80; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 2 + 0.5;
+    s.style.cssText = `width:${size}px;height:${size}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--d:${2+Math.random()*4}s;--delay:${Math.random()*5}s;--op:${0.3+Math.random()*0.7};`;
+    container.appendChild(s);
+  }
+})();
+
+let saved = JSON.parse(localStorage.getItem('bloom_saved_v2') || '[]');
+
+document.querySelectorAll('.mood-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    const input = document.getElementById('visionInput');
+    const add = chip.dataset.text;
+    chip.classList.toggle('active');
+    if (chip.classList.contains('active')) {
+      input.value = input.value ? input.value.trimEnd() + ', ' + add : add;
+    } else {
+      input.value = input.value.replace(', ' + add, '').replace(add + ', ', '').replace(add, '').trim();
+    }
+  });
+});
+
+// ─── Affirmation Engine ───────────────────────────────────────────────────
+
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+// Theme detection — scan input for signals and match to a theme
+const themeMap = [
+  {
+    theme: 'Confidence',
+    signals: ['confidence','confident','belief','believe','self-esteem','worthy','worth','bold','assertive','strong','courage','courageous','brave','bravery','speak up','voice','doubt','insecure','insecurity'],
+    affirmations: [
+      `I am confident, capable, and worthy of everything I desire — I trust myself completely.`,
+      `I walk through life with quiet confidence, knowing I am enough exactly as I am.`,
+      `I believe in myself deeply, and that belief grows stronger with every step I take.`,
+      `I am becoming bolder every day — my voice matters and I deserve to be heard.`,
+      `I release all self-doubt and step into my power with grace and certainty.`,
+      `I am worthy of love, success, and happiness — I claim all of it without apology.`,
+      `My confidence is unshakeable because it comes from within, not from the approval of others.`,
+    ]
+  },
+  {
+    theme: 'Inner Peace',
+    signals: ['peace','peaceful','calm','calm','anxiety','anxious','stress','stressed','worry','worried','overwhelm','overwhelmed','quiet','stillness','relax','relaxed','tension','nervous','mind','mental'],
+    affirmations: [
+      `I am at peace with who I am and where I am — all is well in my world.`,
+      `I release worry and choose calm — my mind is clear, my heart is still.`,
+      `Peace is my natural state, and I return to it with ease no matter what surrounds me.`,
+      `I breathe in calm and breathe out tension — with every breath I feel more at ease.`,
+      `I am learning to be still, and in that stillness I find everything I need.`,
+      `My mind is quiet, my body is relaxed, and I trust that everything is unfolding perfectly.`,
+      `I choose peace over fear, calm over chaos, and trust over worry — every single day.`,
+    ]
+  },
+  {
+    theme: 'Abundance',
+    signals: ['money','financial','abundance','wealthy','wealth','rich','income','career','job','work','business','success','successful','prosper','prosperity','opportunity','opportunities','earn','earning','afford','debt','bills'],
+    affirmations: [
+      `I am a magnet for abundance — money flows to me easily and frequently.`,
+      `I deserve financial freedom and I am creating it with every choice I make.`,
+      `Abundance is my birthright and I open myself fully to receiving it now.`,
+      `I attract prosperity in expected and unexpected ways — the universe provides for me always.`,
+      `My relationship with money is healthy, positive, and growing stronger every day.`,
+      `I am worthy of great success and I take confident steps toward it every day.`,
+      `Opportunities find me wherever I go — I am open, ready, and grateful for all that comes.`,
+    ]
+  },
+  {
+    theme: 'Love',
+    signals: ['love','relationship','partner','romance','romantic','connection','lonely','loneliness','heart','soulmate','marriage','attract','dating','trust','intimacy','family','friendship','friends','bond'],
+    affirmations: [
+      `I am deeply loved and I attract relationships that are kind, genuine, and nurturing.`,
+      `Love flows to me naturally — I am open to giving and receiving it fully.`,
+      `I deserve a love that is deep, real, and lasting — and I welcome it into my life now.`,
+      `I attract people who see me, value me, and lift me higher every day.`,
+      `My heart is open and I trust that the right connections are already finding their way to me.`,
+      `I am worthy of love exactly as I am — I do not need to change to be deserving of it.`,
+      `The love I give comes back to me multiplied — I am surrounded by warmth and connection.`,
+    ]
+  },
+  {
+    theme: 'Health',
+    signals: ['health','healthy','body','fitness','fit','exercise','weight','energy','energetic','vitality','heal','healing','illness','sick','diet','nutrition','sleep','rest','strong','strength','wellbeing','wellness'],
+    affirmations: [
+      `My body is strong, healthy, and full of energy — I take great care of it every day.`,
+      `I listen to my body with love and give it exactly what it needs to thrive.`,
+      `Every day my health improves — I am healing and growing stronger in every way.`,
+      `I honour my body with nourishing food, joyful movement, and deep, restful sleep.`,
+      `I am grateful for my body and all that it does for me — I treat it with kindness.`,
+      `Vibrant health is my natural state and I return to it with ease and gratitude.`,
+      `I am becoming healthier, stronger, and more energetic with every passing day.`,
+    ]
+  },
+  {
+    theme: 'Purpose',
+    signals: ['purpose','passion','calling','direction','meaning','meaningful','goal','goals','dream','dreams','vision','path','clarity','clear','focus','focused','future','potential','create','creative','creativity','talent','gift'],
+    affirmations: [
+      `I am living my purpose — every day I move closer to the life I was meant to live.`,
+      `My gifts and talents are needed in this world and I share them with confidence.`,
+      `I have a clear vision for my future and I take inspired action toward it every day.`,
+      `I trust the direction my life is taking — everything is leading me somewhere beautiful.`,
+      `I am exactly where I need to be, doing what I am meant to do, becoming who I am meant to become.`,
+      `My dreams are valid, my goals are achievable, and I am more than capable of reaching them.`,
+      `I create a life of meaning and joy — my purpose unfolds naturally as I show up each day.`,
+    ]
+  },
+  {
+    theme: 'Growth',
+    signals: ['grow','growth','learn','learning','improve','improvement','change','better','progress','develop','development','evolve','evolution','transform','transformation','habit','discipline','knowledge','skill','skills','potential'],
+    affirmations: [
+      `I am growing every day — each experience makes me wiser, stronger, and more resilient.`,
+      `I embrace change as an opportunity to become the best version of myself.`,
+      `I am committed to my growth and I show up for myself even when it is hard.`,
+      `Every step forward, no matter how small, is progress — and I celebrate every one.`,
+      `I am not who I was yesterday — I am always evolving into something greater.`,
+      `I welcome challenges because I know they are shaping me into who I am meant to be.`,
+      `I invest in myself every day and the returns are beyond what I can yet imagine.`,
+    ]
+  },
+  {
+    theme: 'Healing',
+    signals: ['heal','healing','trauma','pain','hurt','grief','loss','recover','recovery','past','forgive','forgiveness','letting go','release','move on','broken','wound','wounded','overcome','struggle'],
+    affirmations: [
+      `I am healing — slowly, gently, and completely — and I honour every step of the journey.`,
+      `I release the past with love and make space for a future that is bright and full of possibility.`,
+      `I forgive myself and others freely — this forgiveness sets me free to live fully.`,
+      `My wounds are becoming wisdom and my pain is becoming my greatest source of strength.`,
+      `I am not defined by what happened to me — I am defined by how I rise from it.`,
+      `I give myself permission to heal at my own pace, without judgment or rush.`,
+      `Every day I am releasing what no longer serves me and embracing all that lifts me up.`,
+    ]
+  },
+  {
+    theme: 'Gratitude',
+    signals: ['grateful','gratitude','thankful','thankfulness','appreciate','appreciation','blessed','blessings','joy','joyful','happy','happiness','positive','positivity','abundance','beauty','gift','gifts'],
+    affirmations: [
+      `I am deeply grateful for the beauty in my life — there is always something to appreciate.`,
+      `Gratitude opens my heart and draws more goodness into every corner of my life.`,
+      `I choose to see the gifts in every day — even the small ones are worth celebrating.`,
+      `My life is full of blessings and I take time every day to recognise and appreciate them.`,
+      `Joy is my natural state — I find it in the ordinary moments and let it fill me completely.`,
+      `The more grateful I am, the more I have to be grateful for — abundance multiplies in my life.`,
+      `I wake each morning with a thankful heart and go to bed each night counting my blessings.`,
+    ]
+  },
+  {
+    theme: 'Self-Trust',
+    signals: ['trust','intuition','gut','instinct','decision','decisions','choice','choices','self','authentic','authenticity','true','truth','honest','honesty','know','knowing','certain','certainty','faith'],
+    affirmations: [
+      `I trust myself — my instincts are wise, my choices are sound, and my path is right for me.`,
+      `I honour my intuition and follow it without apology — it always leads me where I need to go.`,
+      `I am the expert on my own life and I make decisions with confidence and clarity.`,
+      `I trust the process of my life — everything is unfolding in perfect timing for me.`,
+      `I know who I am and I stand firmly in that knowledge, no matter what others may think.`,
+      `I am authentic, honest, and true to myself in everything I do — and that is my greatest strength.`,
+      `I have everything I need within me — I trust myself to figure it out as I go.`,
+    ]
+  },
+  {
+    theme: 'Resilience',
+    signals: ['resilience','resilient','strong','strength','overcome','challenge','challenges','difficult','difficulty','hard','tough','bounce','recover','persist','persistence','keep going','never give up','determination','determined'],
+    affirmations: [
+      `I am resilient — I have overcome challenges before and I will overcome this one too.`,
+      `I bend but I do not break — every hardship is making me stronger and more capable.`,
+      `I keep going even when it is hard, because I know that persistence always pays off.`,
+      `I am tougher than any challenge that comes my way — I rise every single time.`,
+      `Difficulties do not define me — how I respond to them does, and I always respond with strength.`,
+      `I trust my ability to handle whatever comes — I have done it before and I will do it again.`,
+      `I am built for this — every obstacle is just a stepping stone on the path to my greatness.`,
+    ]
+  },
+  {
+    theme: 'Freedom',
+    signals: ['free','freedom','independent','independence','control','boundary','boundaries','limit','limits','escape','release','open','liberate','liberation','choice','authentic','own','own path','own life'],
+    affirmations: [
+      `I am free to live life on my own terms — I answer to my own truth and no one else's.`,
+      `I release all that confines me and step boldly into the open, limitless life I deserve.`,
+      `I set healthy boundaries with ease and grace — they protect my freedom and my peace.`,
+      `I am not constrained by my past, my fears, or others' expectations — I am gloriously free.`,
+      `I choose my own path and walk it with courage, curiosity, and complete confidence.`,
+      `Freedom is my birthright — I claim it fully in my thoughts, my choices, and my life.`,
+      `I give myself permission to live exactly as I choose — joyfully, freely, and without apology.`,
+    ]
+  },
+];
+
+const randomAffirmations = [
+  { affirmation: `I am exactly where I need to be, and I trust the journey that is unfolding before me.`, theme: 'Alignment' },
+  { affirmation: `I choose peace — not because life is perfect, but because I deserve it.`, theme: 'Inner Peace' },
+  { affirmation: `I am a magnet for goodness, and wonderful things find their way to me with ease.`, theme: 'Manifestation' },
+  { affirmation: `I am free — free from fear, free to grow, and free to be fully, unapologetically myself.`, theme: 'Freedom' },
+  { affirmation: `I give myself permission to take up space, to be seen, and to shine without apology.`, theme: 'Confidence' },
+  { affirmation: `I am not behind. I am not too late. I am right on time for my own beautiful life.`, theme: 'Self-Trust' },
+  { affirmation: `I trust myself completely — my instincts guide me and my choices serve me well.`, theme: 'Self-Trust' },
+  { affirmation: `I am healing in ways both seen and unseen, and I honour every step of this journey.`, theme: 'Healing' },
+  { affirmation: `I radiate warmth and confidence, and the world around me reflects that back beautifully.`, theme: 'Confidence' },
+  { affirmation: `I deserve deep rest, real love, and a life that feels genuinely mine.`, theme: 'Worthiness' },
+  { affirmation: `I am grateful for who I am today and excited about who I am still becoming.`, theme: 'Gratitude' },
+  { affirmation: `Joy is not something I have to earn — it is my birthright, and I claim it right now.`, theme: 'Joy' },
+  { affirmation: `I attract relationships that nourish me, challenge me, and lift me higher.`, theme: 'Love' },
+  { affirmation: `I am resilient. Every challenge I face is quietly making me wiser and stronger.`, theme: 'Resilience' },
+  { affirmation: `I move through life with grace and ease, and good things come to me naturally.`, theme: 'Alignment' },
+  { affirmation: `My mind is calm, my heart is open, and I am ready for everything that is coming.`, theme: 'Inner Peace' },
+  { affirmation: `I choose to see the beauty in this moment — it is always there if I look for it.`, theme: 'Gratitude' },
+  { affirmation: `I am creative, capable, and full of ideas that have the power to change my world.`, theme: 'Creativity' },
+  { affirmation: `Abundance flows to me in expected and unexpected ways, and I receive it with gratitude.`, theme: 'Abundance' },
+  { affirmation: `I am learning to love myself more fully every single day, and it changes everything.`, theme: 'Self-Love' },
+  { affirmation: `I release what I cannot control and find peace in trusting the process of my life.`, theme: 'Inner Peace' },
+  { affirmation: `I am surrounded by love and everything is working out for my highest good.`, theme: 'Love' },
+  { affirmation: `I honour my journey — every twist, every turn has been leading me somewhere wonderful.`, theme: 'Purpose' },
+  { affirmation: `I am enough. I have always been enough. I will always be enough.`, theme: 'Self-Worth' },
+  { affirmation: `My potential is limitless and I am only just beginning to discover what I am capable of.`, theme: 'Growth' },
+];
+
+function detectTheme(vision) {
+  const input = vision.toLowerCase();
+  let bestMatch = null;
+  let bestScore = 0;
+
+  themeMap.forEach(t => {
+    const score = t.signals.filter(s => input.includes(s)).length;
+    if (score > bestScore) { bestScore = score; bestMatch = t; }
+  });
+
+  return bestMatch;
+}
+
+function buildVisionAffirmation(vision) {
+  const match = detectTheme(vision);
+  if (match) {
+    return { affirmation: pick(match.affirmations), theme: match.theme };
+  }
+  // No theme detected — use a random affirmation
+  return pick(randomAffirmations);
+}
+
+
+function generateAI() {
+  const vision = document.getElementById('visionInput').value.trim();
+  if (!vision) { document.getElementById('visionInput').focus(); showToast('Tell me what you want in your life ✦'); return; }
+  showResult(buildVisionAffirmation(vision));
+}
+
+function quickRandom() { showResult(pick(randomAffirmations)); }
+
+function showResult(item) {
+  stopSpeaking();
+  const text = document.getElementById('affText');
+  const theme = document.getElementById('affTheme');
+  text.classList.add('fade');
+  setTimeout(() => {
+    text.textContent = item.affirmation;
+    text.classList.remove('placeholder-text');
+    theme.textContent = item.theme;
+    text.classList.remove('fade');
+    document.getElementById('repeatRow').style.display = 'flex';
+    document.getElementById('repeatCounter').textContent = '';
+    document.getElementById('stopRepeatBtn').style.display = 'none';
+  }, 320);
+}
+
+let repeatCount = 0;
+let repeatTotal = 0;
+
+function repeatSpeak(times) {
+  const text = document.getElementById('affText').textContent;
+  if (!text || text.includes('appear here')) { showToast('Generate an affirmation first ✦'); return; }
+  stopSpeaking();
+  repeatTotal = times;
+  repeatCount = 0;
+  document.getElementById('stopRepeatBtn').style.display = 'inline-block';
+  doRepeat(text);
+}
+
+async function doRepeat(text) {
+  if (repeatCount >= repeatTotal) {
+    document.getElementById('repeatCounter').textContent = '✓ Done!';
+    document.getElementById('stopRepeatBtn').style.display = 'none';
+    isSpeaking = false;
+    document.getElementById('speakBtn').textContent = '🔊 Listen';
+    document.getElementById('speakBtn').classList.remove('speaking');
+    return;
+  }
+  repeatCount++;
+  document.getElementById('repeatCounter').textContent = `${repeatCount} / ${repeatTotal}`;
+  await speakText(text);
+  if (isSpeaking) {
+    setTimeout(() => doRepeat(text), 800);
+  }
+}
+
+function saveCurrentAff() {
+  const text = document.getElementById('affText').textContent;
+  const theme = document.getElementById('affTheme').textContent;
+  if (!text || text.includes('appear here') || saved.find(s => s.affirmation === text)) { showToast('Already saved ✓'); return; }
+  saved.unshift({ affirmation: text, theme });
+  localStorage.setItem('bloom_saved_v2', JSON.stringify(saved));
+  renderSaved();
+  showToast('Saved to your collection ♡');
+}
+
+function shareAff() {
+  const text = document.getElementById('affText').textContent;
+  const theme = document.getElementById('affTheme').textContent;
+  if (!text || text.includes('appear here')) { showToast('Generate an affirmation first ✦'); return; }
+  const shareText = `✨ ${text}\n\n— ${theme} affirmation from Bloom 🌸`;
+  if (navigator.share) {
+    navigator.share({ text: shareText }).then(() => showToast('Shared! 🌸')).catch(() => {});
+  } else {
+    navigator.clipboard.writeText(shareText).then(() => showToast('Copied — ready to paste & share! ⎘'));
+  }
+}
+
+function copyAff() {
+  const text = document.getElementById('affText').textContent;
+  if (!text || text.includes('appear here')) return;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = '✓ Copied!';
+    btn.style.background = 'rgba(251,191,36,0.25)';
+    showToast('Copied to clipboard ⎘');
+    setTimeout(() => { btn.textContent = '⎘ Copy Affirmation'; btn.style.background = ''; }, 2000);
+  });
+}
+
+function deleteSaved(i) {
+  saved.splice(i, 1);
+  localStorage.setItem('bloom_saved_v2', JSON.stringify(saved));
+  renderSaved();
+}
+
+function clearAll() {
+  saved = [];
+  localStorage.setItem('bloom_saved_v2', JSON.stringify(saved));
+  renderSaved();
+}
+
+function renderSaved() {
+  const section = document.getElementById('savedSection');
+  const list = document.getElementById('savedList');
+  if (!saved.length) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  list.innerHTML = saved.map((s, i) => `
+    <div class="saved-item">
+      <div style="flex:1">
+        <p>${s.affirmation}</p>
+        <div class="theme-badge">${s.theme}</div>
+      </div>
+      <button class="del-item" onclick="deleteSaved(${i})">✕</button>
+    </div>
+  `).join('');
+}
+
+// ─── Text-to-Speech (Google Cloud) ───────────────────────────────────────
+let isSpeaking = false;
+let currentAudio = null;
+let bestVoice = null;
+
+async function toggleSpeak() {
+  const text = document.getElementById('affText').textContent;
+  const btn = document.getElementById('speakBtn');
+  if (!text || text.includes('appear here')) { showToast('Generate an affirmation first ✦'); return; }
+  if (isSpeaking) { stopSpeaking(); return; }
+  await speakText(text);
+}
+
+async function speakText(text) {
+  const btn = document.getElementById('speakBtn');
+  isSpeaking = true;
+  btn.textContent = '⏳ Loading...';
+  btn.classList.add('speaking');
+
   try {
-    const { text } = JSON.parse(event.body);
+    const response = await fetch('/.netlify/functions/tts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text }),
+    });
 
-    if (!text) {
-      return { statusCode: 400, body: 'No text provided' };
-    }
-
-    const apiKey = process.env.GOOGLE_TTS_API_KEY;
-
-    if (!apiKey) {
-      return { statusCode: 500, body: 'API key not found' };
-    }
-
-    const response = await fetch(
-      `https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          input: { text },
-          voice: {
-            languageCode: 'en-AU',
-            name: 'en-AU-Neural2-C',
-            ssmlGender: 'FEMALE'
-          },
-          audioConfig: {
-            audioEncoding: 'MP3',
-            speakingRate: 0.82,
-            pitch: -1.5,
-            volumeGainDb: 1.0,
-            effectsProfileId: ['headphone-class-device']
-          }
-        })
-      }
-    );
-
-    if (!response.ok) {
-      const err = await response.text();
-      return { statusCode: response.status, body: err };
-    }
+    if (!response.ok) throw new Error('Voice service error');
 
     const data = await response.json();
 
-    return {
-      statusCode: 200,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ audio: data.audioContent })
-    };
+    const audioBytes = atob(data.audio);
+    const arrayBuffer = new ArrayBuffer(audioBytes.length);
+    const view = new Uint8Array(arrayBuffer);
+    for (let i = 0; i < audioBytes.length; i++) {
+      view[i] = audioBytes.charCodeAt(i);
+    }
+    const blob = new Blob([arrayBuffer], { type: 'audio/mpeg' });
+    const url = URL.createObjectURL(blob);
+
+    currentAudio = new Audio(url);
+    btn.textContent = '⏹ Stop';
+
+    return new Promise((resolve) => {
+      currentAudio.onended = () => {
+        URL.revokeObjectURL(url);
+        currentAudio = null;
+        if (repeatCount >= repeatTotal) {
+          isSpeaking = false;
+          btn.textContent = '🔊 Listen';
+          btn.classList.remove('speaking');
+        }
+        resolve();
+      };
+      currentAudio.onerror = () => {
+        isSpeaking = false;
+        btn.textContent = '🔊 Listen';
+        btn.classList.remove('speaking');
+        showToast('Audio error — try again');
+        resolve();
+      };
+      currentAudio.play();
+    });
 
   } catch (err) {
-    return { statusCode: 500, body: 'Server error: ' + err.message };
+    isSpeaking = false;
+    btn.textContent = '🔊 Listen';
+    btn.classList.remove('speaking');
+    showToast('Could not load voice — check connection ✦');
+    console.error('Google TTS error:', err);
   }
-};
+}
+
+function stopSpeaking() {
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+    currentAudio = null;
+  }
+  window.speechSynthesis.cancel();
+  isSpeaking = false;
+  repeatCount = 0;
+  repeatTotal = 0;
+  const btn = document.getElementById('speakBtn');
+  if (btn) { btn.textContent = '🔊 Listen'; btn.classList.remove('speaking'); }
+  const stopBtn = document.getElementById('stopRepeatBtn');
+  if (stopBtn) stopBtn.style.display = 'none';
+  const counter = document.getElementById('repeatCounter');
+  if (counter) counter.textContent = '';
+}
+
+function openModal() { document.getElementById('modalOverlay').classList.add('open'); document.body.style.overflow = 'hidden'; }
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); document.body.style.overflow = ''; }
+function closeModalOutside(e) { if (e.target === document.getElementById('modalOverlay')) closeModal(); }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+document.getElementById('visionInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) generateAI();
+});
+
+renderSaved();
+
+// ══════════════════════════════════════════════════════
+// GAME HUB — 5 levels
+// ══════════════════════════════════════════════════════
+let gAffirmation = '';
+let gAllWords = [];
+let gTimer = null;
+let gSeconds = 0;
+let gCompletedLevels = new Set();
+
+function openGame() {
+  gLoadSaved();
+  document.getElementById('gameOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('gameOverlay').scrollTop = 0;
+  gHideAllPanels();
+  document.getElementById('gHubArea').style.display = 'none';
+}
+
+function closeGame() {
+  document.getElementById('gameOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  clearInterval(gTimer);
+}
+
+function gLoadSaved() {
+  const saved = JSON.parse(localStorage.getItem('bloom_saved_v2') || '[]');
+  const sel = document.getElementById('gSelect');
+  const noMsg = document.getElementById('gNoSaved');
+  sel.innerHTML = '';
+  if (saved.length === 0) {
+    noMsg.style.display = 'block'; sel.style.display = 'none';
+  } else {
+    noMsg.style.display = 'none'; sel.style.display = 'block';
+    saved.forEach(item => {
+      const opt = document.createElement('option');
+      opt.value = item.affirmation;
+      const label = item.affirmation.length > 55 ? item.affirmation.slice(0,52)+'...' : item.affirmation;
+      opt.textContent = (item.theme ? '['+item.theme+'] ' : '') + label;
+      sel.appendChild(opt);
+    });
+  }
+}
+
+function gOnSelectChange() {}
+
+function gGoHub() {
+  const text = document.getElementById('gSelect').value;
+  if (!text) return;
+  gAffirmation = text;
+  gCompletedLevels = new Set(JSON.parse(localStorage.getItem('bloom_levels_'+btoa(text).slice(0,20)) || '[]'));
+  gAllWords = text.replace(/[^a-zA-Z\s]/g,'').split(/\s+/).filter(w=>w.length>0);
+  document.getElementById('gHubAff').textContent = '"' + text + '"';
+  document.getElementById('gHubArea').style.display = 'block';
+  gHideAllPanels();
+  gUpdateLevelCards();
+}
+
+function gUpdateLevelCards() {
+  for (let i = 1; i <= 5; i++) {
+    const card = document.getElementById('lvl'+i+'Card');
+    const lock = document.getElementById('lvl'+i+'Lock');
+    const isUnlocked = i === 1 || gCompletedLevels.has(i-1);
+    const isCompleted = gCompletedLevels.has(i);
+    card.classList.toggle('locked', !isUnlocked);
+    card.classList.toggle('completed', isCompleted);
+    if (lock) lock.style.display = isUnlocked ? 'none' : 'block';
+  }
+}
+
+function gCompleteLevel(level) {
+  gCompletedLevels.add(level);
+  const key = 'bloom_levels_'+btoa(gAffirmation).slice(0,20);
+  localStorage.setItem(key, JSON.stringify([...gCompletedLevels]));
+  gUpdateLevelCards();
+}
+
+function gHideAllPanels() {
+  for (let i = 1; i <= 5; i++) {
+    const p = document.getElementById('panel'+i);
+    if (p) { p.classList.remove('active'); }
+  }
+}
+
+function gOpenLevel(level) {
+  const isUnlocked = level === 1 || gCompletedLevels.has(level-1);
+  if (!isUnlocked) return;
+  clearInterval(gTimer);
+  gSeconds = 0;
+  gHideAllPanels();
+  document.getElementById('gHubArea').style.display = 'none';
+  document.getElementById('panel'+level).classList.add('active');
+  document.getElementById('gameOverlay').scrollTop = 0;
+  if (level === 1) l1Start();
+  else if (level === 2) l2Start();
+  else if (level === 3) l3Start();
+  else if (level === 4) l4Start();
+  else if (level === 5) l5Start();
+}
+
+function gBackToHub() {
+  clearInterval(gTimer);
+  gHideAllPanels();
+  document.getElementById('gHubArea').style.display = 'block';
+  gUpdateLevelCards();
+  document.getElementById('gameOverlay').scrollTop = 0;
+}
+
+function gStartTimer(tickFn) {
+  clearInterval(gTimer);
+  gSeconds = 0;
+  gTimer = setInterval(() => { gSeconds++; tickFn(); }, 1000);
+}
+
+function gFmtTime(s) {
+  return Math.floor(s/60)+':'+(s%60).toString().padStart(2,'0');
+}
+
+function gGetKeyWords() {
+  const stop = new Set(['i','am','a','an','the','and','or','to','of','in','my','me','it','is','that','not','for','with','be','do','so','all','who','was','are','its','but','no','by','this','we','you','your','their','our']);
+  const words = gAffirmation.replace(/[^a-zA-Z\s]/g,'').split(/\s+/);
+  const unique = [...new Set(words.map(w=>w.toLowerCase()))].filter(w=>w.length>2&&!stop.has(w));
+  return unique.sort((a,b)=>b.length-a.length).slice(0,8);
+}
+
+// ── LEVEL 1: Pairs ──────────────────────────────────
+let l1Flipped=[], l1Matched=[], l1Moves=0, l1PairsCount=0, l1Words=[], l1Locked=false;
+
+function l1Start() {
+  l1Words = gGetKeyWords();
+  if (l1Words.length < 3) { alert('Affirmation too short!'); gBackToHub(); return; }
+  l1Flipped=[]; l1Matched=[]; l1Moves=0; l1PairsCount=0; l1Locked=false;
+  document.getElementById('l1Win').classList.remove('show');
+  document.getElementById('l1Moves').textContent='0';
+  document.getElementById('l1Pairs').textContent='0/'+l1Words.length;
+  gStartTimer(()=>document.getElementById('l1Time').textContent=gFmtTime(gSeconds));
+  l1BuildBoard();
+  l1UpdateProgress();
+}
+
+function l1BuildBoard() {
+  const board = document.getElementById('l1Board');
+  board.innerHTML='';
+  const cards=[...l1Words,...l1Words];
+  for(let i=cards.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cards[i],cards[j]]=[cards[j],cards[i]];}
+  board.style.gridTemplateColumns='repeat(4,1fr)';
+  board.style.maxWidth='440px';
+  board.style.margin='0 auto 20px';
+  cards.forEach(word=>{
+    const wrap=document.createElement('div'); wrap.className='g-card-wrap';
+    const card=document.createElement('div'); card.className='g-card'; card.dataset.word=word;
+    card.innerHTML=`<div class="g-card-face g-card-front"><div class="g-card-front-inner">✦</div></div><div class="g-card-face g-card-back"><span>${word}</span></div>`;
+    card.addEventListener('click',()=>l1Click(card));
+    wrap.appendChild(card); board.appendChild(wrap);
+  });
+}
+
+function l1Click(card) {
+  if(l1Locked||card.classList.contains('flipped')||card.classList.contains('matched')) return;
+  card.classList.add('flipped'); l1Flipped.push(card);
+  if(l1Flipped.length===2){l1Locked=true; l1Moves++; document.getElementById('l1Moves').textContent=l1Moves; l1CheckMatch();}
+}
+
+function l1CheckMatch() {
+  const [a,b]=l1Flipped;
+  if(a.dataset.word===b.dataset.word){
+    setTimeout(()=>{
+      a.classList.remove('flipped'); b.classList.remove('flipped');
+      a.classList.add('matched'); b.classList.add('matched');
+      l1Matched.push(a.dataset.word); l1PairsCount++;
+      document.getElementById('l1Pairs').textContent=l1PairsCount+'/'+l1Words.length;
+      l1UpdateProgress(); l1Flipped=[]; l1Locked=false;
+      if(l1PairsCount===l1Words.length){clearInterval(gTimer); setTimeout(()=>l1Win(),600);}
+    },400);
+  } else {
+    a.classList.add('wrong'); b.classList.add('wrong');
+    setTimeout(()=>{a.classList.remove('wrong','flipped');b.classList.remove('wrong','flipped');l1Flipped=[];l1Locked=false;},900);
+  }
+}
+
+function l1UpdateProgress() {
+  const matchedSet=new Set(l1Matched.map(w=>w.toLowerCase()));
+  document.getElementById('l1Progress').innerHTML=gAllWords.map(w=>matchedSet.has(w.toLowerCase())?`<span class="revealed">${w}</span>`:`<span style="color:var(--dim)">${w}</span>`).join(' ');
+}
+
+function l1Win() {
+  gCompleteLevel(1);
+  document.getElementById('l1WinAff').textContent='"'+gAffirmation+'"';
+  document.getElementById('l1WinStats').innerHTML=`${l1Moves} moves · ${gFmtTime(gSeconds)}`;
+  document.getElementById('l1Win').classList.add('show');
+  document.getElementById('l1Win').scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+// ── LEVEL 2: Scrambled ──────────────────────────────
+let l2Order=[], l2AllWords=[], l2Tries=0;
+
+function l2Start() {
+  l2AllWords = gAffirmation.replace(/[^a-zA-Z\s]/g,'').split(/\s+/).filter(w=>w.length>0);
+  l2Order=[];
+  l2Tries=0;
+  document.getElementById('l2Win').classList.remove('show');
+  document.getElementById('l2Tries').textContent='0';
+  gStartTimer(()=>document.getElementById('l2Time').textContent=gFmtTime(gSeconds));
+  l2BuildTiles();
+  l2UpdateSlot();
+}
+
+function l2BuildTiles() {
+  const container=document.getElementById('l2Words');
+  container.innerHTML='';
+  const shuffled=[...l2AllWords];
+  for(let i=shuffled.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]];}
+  shuffled.forEach((word,i)=>{
+    const tile=document.createElement('div');
+    tile.className='word-tile';
+    tile.textContent=word;
+    tile.dataset.idx=i;
+    tile.dataset.word=word;
+    tile.addEventListener('click',()=>l2TapTile(tile));
+    container.appendChild(tile);
+  });
+}
+
+function l2TapTile(tile) {
+  if(tile.classList.contains('placed')) {
+    // Remove from order
+    const idx=parseInt(tile.dataset.idx);
+    l2Order=l2Order.filter(i=>i!==idx);
+    tile.classList.remove('placed');
+  } else {
+    tile.classList.add('placed');
+    l2Order.push(parseInt(tile.dataset.idx));
+  }
+  l2UpdateSlot();
+}
+
+function l2UpdateSlot() {
+  const slot=document.getElementById('l2Slot');
+  const tiles=document.querySelectorAll('#l2Words .word-tile');
+  const tileArr=[...tiles];
+  if(l2Order.length===0){
+    slot.innerHTML='<span style="color:var(--dim);font-size:0.85rem;font-style:italic;">Tap words to build your affirmation...</span>';
+    return;
+  }
+  slot.innerHTML='';
+  l2Order.forEach(idx=>{
+    const t=tileArr.find(t=>parseInt(t.dataset.idx)===idx);
+    if(t){
+      const span=document.createElement('span');
+      span.className='word-tile placed';
+      span.textContent=t.dataset.word;
+      span.style.cursor='default';
+      slot.appendChild(span);
+    }
+  });
+}
+
+function l2Check() {
+  l2Tries++;
+  document.getElementById('l2Tries').textContent=l2Tries;
+  const tiles=[...document.querySelectorAll('#l2Words .word-tile')];
+  const attempt=l2Order.map(idx=>tiles.find(t=>parseInt(t.dataset.idx)===idx)?.dataset.word||'').join(' ').toLowerCase();
+  const target=l2AllWords.join(' ').toLowerCase();
+  if(attempt===target){
+    clearInterval(gTimer); gCompleteLevel(2);
+    document.getElementById('l2WinAff').textContent='"'+gAffirmation+'"';
+    document.getElementById('l2WinStats').innerHTML=`${l2Tries} ${l2Tries===1?'try':'tries'} · ${gFmtTime(gSeconds)}`;
+    document.getElementById('l2Win').classList.add('show');
+    document.getElementById('l2Win').scrollIntoView({behavior:'smooth',block:'center'});
+  } else {
+    document.querySelectorAll('#l2Words .word-tile.placed').forEach(t=>t.classList.add('wrong-place'));
+    setTimeout(()=>document.querySelectorAll('#l2Words .word-tile').forEach(t=>t.classList.remove('wrong-place')),500);
+  }
+}
+
+function l2Reset() {
+  l2Order=[];
+  document.querySelectorAll('#l2Words .word-tile').forEach(t=>t.classList.remove('placed'));
+  l2UpdateSlot();
+}
+
+// ── LEVEL 3: Fill in the Blank ──────────────────────
+let l3Questions=[], l3Current=0, l3Score=0;
+
+function l3Start() {
+  const words=gAffirmation.replace(/[^a-zA-Z\s]/g,'').split(/\s+/).filter(w=>w.length>2);
+  const stop=new Set(['the','and','or','to','of','in','my','me','it','is','that','not','for','with','be','a','an','am']);
+  const candidates=words.filter(w=>!stop.has(w.toLowerCase()));
+  const shuffled=[...candidates].sort(()=>Math.random()-0.5);
+  l3Questions=shuffled.slice(0,Math.min(5,shuffled.length)).map(answer=>{
+    const wrongPool=gGetKeyWords().filter(w=>w.toLowerCase()!==answer.toLowerCase());
+    const wrong=wrongPool.sort(()=>Math.random()-0.5).slice(0,3);
+    const opts=[answer,...wrong].sort(()=>Math.random()-0.5);
+    return {answer,opts};
+  });
+  l3Current=0; l3Score=0;
+  document.getElementById('l3Win').classList.remove('show');
+  document.getElementById('l3Score').textContent='0';
+  gStartTimer(()=>document.getElementById('l3Time').textContent=gFmtTime(gSeconds));
+  l3ShowQuestion();
+}
+
+function l3ShowQuestion() {
+  const q=l3Questions[l3Current];
+  document.getElementById('l3Q').textContent=(l3Current+1)+'/'+l3Questions.length;
+  document.getElementById('l3Progress').textContent=`Question ${l3Current+1} of ${l3Questions.length}`;
+  const sentence=gAffirmation.replace(new RegExp('\\b'+q.answer+'\\b','i'),'<span class="fitb-blank">_______</span>');
+  document.getElementById('l3Sentence').innerHTML=sentence;
+  const opts=document.getElementById('l3Options');
+  opts.innerHTML='';
+  q.opts.forEach(opt=>{
+    const btn=document.createElement('button');
+    btn.className='fitb-opt';
+    btn.textContent=opt;
+    btn.onclick=()=>l3Answer(btn,opt,q.answer);
+    opts.appendChild(btn);
+  });
+}
+
+function l3Answer(btn,chosen,correct) {
+  document.querySelectorAll('.fitb-opt').forEach(b=>b.onclick=null);
+  if(chosen.toLowerCase()===correct.toLowerCase()){
+    btn.classList.add('correct'); l3Score++;
+    document.getElementById('l3Score').textContent=l3Score;
+    setTimeout(()=>{
+      l3Current++;
+      if(l3Current>=l3Questions.length) l3Win();
+      else l3ShowQuestion();
+    },800);
+  } else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('.fitb-opt').forEach(b=>{if(b.textContent.toLowerCase()===correct.toLowerCase())b.classList.add('correct');});
+    setTimeout(()=>{
+      l3Current++;
+      if(l3Current>=l3Questions.length) l3Win();
+      else l3ShowQuestion();
+    },1200);
+  }
+}
+
+function l3Win() {
+  clearInterval(gTimer); gCompleteLevel(3);
+  document.getElementById('l3WinAff').textContent='"'+gAffirmation+'"';
+  document.getElementById('l3WinStats').innerHTML=`${l3Score}/${l3Questions.length} correct · ${gFmtTime(gSeconds)}`;
+  document.getElementById('l3Win').classList.add('show');
+  document.getElementById('l3Win').scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+// ── LEVEL 4: Beat the Clock ──────────────────────────
+let l4Tries=0, l4Phase=0;
+
+function l4Start() {
+  l4Tries=0; l4Phase=1;
+  document.getElementById('l4Win').classList.remove('show');
+  document.getElementById('l4Phase1').style.display='block';
+  document.getElementById('l4Phase2').style.display='none';
+  document.getElementById('l4Flash').textContent=gAffirmation;
+  document.getElementById('l4Flash').classList.remove('hidden');
+  document.getElementById('l4Feedback').textContent='';
+  document.getElementById('l4Input').value='';
+  document.getElementById('l4Input').classList.remove('correct');
+  document.getElementById('l4Tries').textContent='0';
+
+  let countdown=5;
+  document.getElementById('l4Countdown').textContent=countdown;
+  document.getElementById('l4PhaseMsg').textContent='Memorise it! Disappearing in '+countdown+'...';
+  
+  const cd=setInterval(()=>{
+    countdown--;
+    document.getElementById('l4Countdown').textContent=countdown;
+    document.getElementById('l4PhaseMsg').textContent='Memorise it! Disappearing in '+countdown+'...';
+    if(countdown<=0){
+      clearInterval(cd);
+      document.getElementById('l4Flash').classList.add('hidden');
+      document.getElementById('l4Countdown').textContent='';
+      document.getElementById('l4PhaseMsg').textContent='Now type it from memory!';
+      setTimeout(()=>{
+        document.getElementById('l4Phase1').style.display='none';
+        document.getElementById('l4Phase2').style.display='block';
+        gStartTimer(()=>document.getElementById('l4Time').textContent=gFmtTime(gSeconds));
+        document.getElementById('l4Input').focus();
+      },600);
+    }
+  },1000);
+}
+
+function l4Check() {
+  const attempt=document.getElementById('l4Input').value.trim();
+  const target=gAffirmation.replace(/[^a-zA-Z\s]/g,'').trim();
+  const clean=s=>s.toLowerCase().replace(/[^a-z\s]/g,'').replace(/\s+/g,' ').trim();
+  l4Tries++;
+  document.getElementById('l4Tries').textContent=l4Tries;
+  if(clean(attempt)===clean(target)){
+    document.getElementById('l4Input').classList.add('correct');
+    document.getElementById('l4Feedback').textContent='✓ Perfect memory!';
+    clearInterval(gTimer); gCompleteLevel(4);
+    setTimeout(()=>{
+      document.getElementById('l4WinAff').textContent='"'+gAffirmation+'"';
+      document.getElementById('l4WinStats').innerHTML=`${l4Tries} ${l4Tries===1?'try':'tries'} · ${gFmtTime(gSeconds)}`;
+      document.getElementById('l4Win').classList.add('show');
+      document.getElementById('l4Win').scrollIntoView({behavior:'smooth',block:'center'});
+    },600);
+  } else {
+    // Show how many words matched
+    const aWords=clean(attempt).split(' ');
+    const tWords=clean(target).split(' ');
+    const matched=aWords.filter((w,i)=>w===tWords[i]).length;
+    document.getElementById('l4Feedback').textContent=`${matched} of ${tWords.length} words in the right place — try again!`;
+  }
+}
+
+// ── LEVEL 5: Word Balloons ──────────────────────────
+let l5Words=[], l5CurrentIdx=0, l5Errors=0, l5BalloonTimer=null;
+
+function l5Start() {
+  l5Words=gAffirmation.replace(/[^a-zA-Z\s]/g,'').split(/\s+/).filter(w=>w.length>0);
+  l5CurrentIdx=0; l5Errors=0;
+  document.getElementById('l5Win').classList.remove('show');
+  document.getElementById('l5Score').textContent='0';
+  document.getElementById('l5Errors').textContent='0';
+  gStartTimer(()=>document.getElementById('l5Time').textContent=gFmtTime(gSeconds));
+  l5UpdateProgress();
+  l5ShowNextWord();
+  l5BuildBalloons();
+}
+
+function l5ShowNextWord() {
+  if(l5CurrentIdx<l5Words.length){
+    document.getElementById('l5NextWord').textContent=l5Words[l5CurrentIdx];
+  }
+}
+
+function l5UpdateProgress() {
+  document.getElementById('l5Progress').innerHTML=l5Words.map((w,i)=>
+    i<l5CurrentIdx?`<span class="revealed">${w}</span>`:`<span style="color:var(--dim)">${w}</span>`
+  ).join(' ');
+}
+
+function l5BuildBalloons() {
+  const area=document.getElementById('l5Area');
+  area.innerHTML='';
+  // Create balloons for all remaining + some distractors
+  const remaining=l5Words.slice(l5CurrentIdx);
+  const distractors=gGetKeyWords().filter(w=>!remaining.map(x=>x.toLowerCase()).includes(w.toLowerCase())).slice(0,4);
+  const allBalloons=[...new Set([...remaining,...distractors])].sort(()=>Math.random()-0.5);
+  
+  allBalloons.forEach((word,i)=>{
+    const b=document.createElement('div');
+    b.className='balloon';
+    b.textContent=word;
+    const isNext=word.toLowerCase()===l5Words[l5CurrentIdx]?.toLowerCase();
+    if(isNext) b.classList.add('next-word');
+    // Random position
+    const left=5+Math.random()*80;
+    const top=5+Math.random()*75;
+    b.style.left=left+'%';
+    b.style.top=top+'%';
+    b.style.setProperty('--fd',(3+Math.random()*3)+'s');
+    b.style.setProperty('--fdelay',(Math.random()*2)+'s');
+    b.addEventListener('click',()=>l5TapBalloon(b,word));
+    area.appendChild(b);
+  });
+}
+
+function l5TapBalloon(balloon,word) {
+  const expected=l5Words[l5CurrentIdx];
+  if(word.toLowerCase()===expected?.toLowerCase()){
+    balloon.classList.add('tapped');
+    l5CurrentIdx++;
+    document.getElementById('l5Score').textContent=l5CurrentIdx;
+    l5UpdateProgress();
+    if(l5CurrentIdx>=l5Words.length){
+      clearInterval(gTimer); gCompleteLevel(5);
+      setTimeout(()=>{
+        document.getElementById('l5WinAff').textContent='"'+gAffirmation+'"';
+        document.getElementById('l5WinStats').innerHTML=`${l5Errors} errors · ${gFmtTime(gSeconds)}`;
+        document.getElementById('l5Win').classList.add('show');
+        document.getElementById('l5Win').scrollIntoView({behavior:'smooth',block:'center'});
+      },600);
+      return;
+    }
+    setTimeout(()=>{
+      l5ShowNextWord();
+      // Update next-word highlighting
+      document.querySelectorAll('#l5Area .balloon').forEach(b=>{
+        b.classList.remove('next-word','tapped');
+        if(b.textContent.toLowerCase()===l5Words[l5CurrentIdx]?.toLowerCase()) b.classList.add('next-word');
+      });
+    },300);
+  } else {
+    l5Errors++;
+    document.getElementById('l5Errors').textContent=l5Errors;
+    balloon.classList.add('wrong-tap');
+    setTimeout(()=>balloon.classList.remove('wrong-tap'),500);
+  }
+}
+
+</script>
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <h2>How Affirmations Work</h2>
+      <p class="modal-subtitle">A simple guide to getting the most from your practice</p>
+      <div class="modal-section">
+        <h3>🧠 What is an affirmation?</h3>
+        <p>An affirmation is a positive statement written in the present tense, as if what you want is already true. The idea is to train your mind to believe something before it has fully happened — shifting your thoughts, feelings, and ultimately your actions toward the life you want.</p>
+      </div>
+      <div class="modal-section">
+        <h3>✨ Why do they work?</h3>
+        <p>Your brain has a system called the Reticular Activating System (RAS) that filters what you notice in the world. When you repeat affirmations regularly, you're essentially programming your RAS to spot opportunities, people, and situations that align with your goals — things you might have overlooked before.</p>
+      </div>
+      <div class="modal-section">
+        <h3>🌅 When should I use them?</h3>
+        <p>The best times are first thing in the morning before your mind fills with the day's noise, and last thing at night when your subconscious is most receptive. Even just 5 minutes of reading or repeating your affirmation can make a real difference over time.</p>
+      </div>
+      <div class="modal-section">
+        <h3>🔁 How do I use this app?</h3>
+        <p>Describe what you genuinely want in your life in the box — be as specific or as broad as you like. Press <em>Create New Affirmation</em> to get one tailored to your vision, or <em>Surprise me</em> for a random spark of inspiration. When one resonates, save it and come back to it daily.</p>
+      </div>
+      <div class="modal-section">
+        <h3>💛 Tips for best results</h3>
+        <p>Say your affirmation out loud if you can. Feel it as you say it — don't just read the words, try to genuinely connect with the emotion behind them. Consistency matters more than perfection. Even on days it feels silly, keep going. The shift happens gradually and then all at once.</p>
+      </div>
+      <div class="modal-tip">
+        <strong>Remember:</strong> Affirmations work best alongside action. They open your mind to possibility — but taking small steps toward your vision every day is what makes the magic real.
+      </div>
+    </div>
+  </div>
+
+<a class="float-game-btn" onclick="openGame()" style="cursor:pointer;">🎮 Affirmation Games</a>
+
+<!-- ── Game Overlay Panel ── -->
+<div class="game-overlay" id="gameOverlay">
+  <div class="game-container">
+
+    <!-- Hub header -->
+    <div style="text-align:center; margin-bottom:24px;">
+      <button class="game-back-btn" onclick="closeGame()">← Back to Bloom</button>
+      <div class="game-badge">✦ Affirmation Games</div>
+      <div class="game-hub-title">Train Your Mind</div>
+      <div class="game-hub-sub">Five games, one affirmation — each level helps you absorb it deeper.</div>
+    </div>
+
+    <!-- Affirmation selector -->
+    <div class="game-selector">
+      <label>Choose one of your saved affirmations to play with</label>
+      <div class="game-sel-row">
+        <select class="g-select" id="gSelect" onchange="gOnSelectChange()"></select>
+        <button class="g-play-btn" onclick="gGoHub()">Choose ✦</button>
+      </div>
+      <p class="g-no-saved" id="gNoSaved">No saved affirmations yet — go back and save some first! ✦</p>
+    </div>
+
+    <!-- Level select hub -->
+    <div id="gHubArea" style="display:none">
+      <div class="g-aff-display" style="margin-bottom:20px;"><p id="gHubAff" style="font-style:italic;color:var(--text);"></p></div>
+      <div class="levels-grid">
+        <div class="level-card" id="lvl1Card" onclick="gOpenLevel(1)">
+          <div class="level-emoji">🃏</div>
+          <div class="level-num">Level 1</div>
+          <div class="level-name">Word Pairs</div>
+          <div class="level-desc">Find the matching word pairs hidden beneath the tiles.</div>
+        </div>
+        <div class="level-card locked" id="lvl2Card" onclick="gOpenLevel(2)">
+          <div class="level-emoji">🔤</div>
+          <div class="level-num">Level 2</div>
+          <div class="level-name">Scrambled</div>
+          <div class="level-desc">Put the words back in the right order to rebuild your affirmation.</div>
+          <div class="level-lock" id="lvl2Lock">🔒 Complete Level 1 first</div>
+        </div>
+        <div class="level-card locked" id="lvl3Card" onclick="gOpenLevel(3)">
+          <div class="level-emoji">🕳️</div>
+          <div class="level-num">Level 3</div>
+          <div class="level-name">Fill the Blank</div>
+          <div class="level-desc">Choose the correct missing word from four options.</div>
+          <div class="level-lock" id="lvl3Lock">🔒 Complete Level 2 first</div>
+        </div>
+        <div class="level-card locked" id="lvl4Card" onclick="gOpenLevel(4)">
+          <div class="level-emoji">⏱️</div>
+          <div class="level-num">Level 4</div>
+          <div class="level-name">Beat the Clock</div>
+          <div class="level-desc">Memorise your affirmation then type it from memory.</div>
+          <div class="level-lock" id="lvl4Lock">🔒 Complete Level 3 first</div>
+        </div>
+        <div class="level-card locked" id="lvl5Card" onclick="gOpenLevel(5)">
+          <div class="level-emoji">🎯</div>
+          <div class="level-num">Level 5</div>
+          <div class="level-name">Word Balloons</div>
+          <div class="level-desc">Tap the floating words in the right order to build your affirmation.</div>
+          <div class="level-lock" id="lvl5Lock">🔒 Complete Level 4 first</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Level 1: Pairs ── -->
+    <div class="g-game-panel" id="panel1">
+      <div class="g-panel-header">
+        <button class="g-panel-back" onclick="gBackToHub()">← Levels</button>
+        <span class="g-panel-emoji">🃏</span>
+        <span class="g-panel-title">Word Pairs</span>
+      </div>
+      <div class="g-stats">
+        <div class="g-stat"><div class="g-stat-val" id="l1Moves">0</div><div class="g-stat-label">Moves</div></div>
+        <div class="g-stat"><div class="g-stat-val" id="l1Pairs">0</div><div class="g-stat-label">Pairs</div></div>
+        <div class="g-stat"><div class="g-stat-val" id="l1Time">0:00</div><div class="g-stat-label">Time</div></div>
+      </div>
+      <div class="g-aff-display"><p id="l1Progress"></p></div>
+      <div class="g-board" id="l1Board"></div>
+      <div class="g-win" id="l1Win">
+        <div style="font-size:2.2rem">🌸</div>
+        <h3>Level 1 Complete!</h3>
+        <div class="g-win-aff" id="l1WinAff"></div>
+        <div style="font-size:0.85rem;color:var(--muted);margin-bottom:16px" id="l1WinStats"></div>
+        <div class="g-win-btns">
+          <button class="g-win-btn" onclick="gOpenLevel(1)">↺ Play Again</button>
+          <button class="g-win-btn" onclick="gOpenLevel(2)">Level 2 → 🔤</button>
+          <button class="g-win-btn sec" onclick="gBackToHub()">All Levels</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Level 2: Scrambled ── -->
+    <div class="g-game-panel" id="panel2">
+      <div class="g-panel-header">
+        <button class="g-panel-back" onclick="gBackToHub()">← Levels</button>
+        <span class="g-panel-emoji">🔤</span>
+        <span class="g-panel-title">Scrambled Words</span>
+      </div>
+      <div class="g-stats">
+        <div class="g-stat"><div class="g-stat-val" id="l2Tries">0</div><div class="g-stat-label">Tries</div></div>
+        <div class="g-stat"><div class="g-stat-val" id="l2Time">0:00</div><div class="g-stat-label">Time</div></div>
+      </div>
+      <p style="text-align:center;font-size:0.82rem;color:var(--muted);margin-bottom:12px;">Tap words in the correct order to rebuild your affirmation</p>
+      <div class="scramble-area">
+        <div class="scramble-slot" id="l2Slot"><span style="color:var(--dim);font-size:0.85rem;font-style:italic;">Your affirmation will appear here as you tap...</span></div>
+        <div class="scramble-words" id="l2Words"></div>
+        <button class="scramble-check-btn" onclick="l2Check()">Check ✦</button>
+        <button style="background:none;border:none;color:var(--dim);font-size:0.8rem;cursor:pointer;margin-top:4px;" onclick="l2Reset()">↺ Reset order</button>
+      </div>
+      <div class="g-win" id="l2Win">
+        <div style="font-size:2.2rem">✨</div>
+        <h3>Level 2 Complete!</h3>
+        <div class="g-win-aff" id="l2WinAff"></div>
+        <div style="font-size:0.85rem;color:var(--muted);margin-bottom:16px" id="l2WinStats"></div>
+        <div class="g-win-btns">
+          <button class="g-win-btn" onclick="gOpenLevel(2)">↺ Play Again</button>
+          <button class="g-win-btn" onclick="gOpenLevel(3)">Level 3 → 🕳️</button>
+          <button class="g-win-btn sec" onclick="gBackToHub()">All Levels</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Level 3: Fill in the Blank ── -->
+    <div class="g-game-panel" id="panel3">
+      <div class="g-panel-header">
+        <button class="g-panel-back" onclick="gBackToHub()">← Levels</button>
+        <span class="g-panel-emoji">🕳️</span>
+        <span class="g-panel-title">Fill the Blank</span>
+      </div>
+      <div class="g-stats">
+        <div class="g-stat"><div class="g-stat-val" id="l3Score">0</div><div class="g-stat-label">Score</div></div>
+        <div class="g-stat"><div class="g-stat-val" id="l3Q">0</div><div class="g-stat-label">Question</div></div>
+        <div class="g-stat"><div class="g-stat-val" id="l3Time">0:00</div><div class="g-stat-label">Time</div></div>
+      </div>
+      <div class="fitb-progress" id="l3Progress"></div>
+      <div class="fitb-sentence" id="l3Sentence"></div>
+      <div class="fitb-options" id="l3Options"></div>
+      <div class="g-win" id="l3Win">
+        <div style="font-size:2.2rem">💫</div>
+        <h3>Level 3 Complete!</h3>
+        <div class="g-win-aff" id="l3WinAff"></div>
+        <div style="font-size:0.85rem;color:var(--muted);margin-bottom:16px" id="l3WinStats"></div>
+        <div class="g-win-btns">
+          <button class="g-win-btn" onclick="gOpenLevel(3)">↺ Play Again</button>
+          <button class="g-win-btn" onclick="gOpenLevel(4)">Level 4 → ⏱️</button>
+          <button class="g-win-btn sec" onclick="gBackToHub()">All Levels</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Level 4: Beat the Clock ── -->
+    <div class="g-game-panel" id="panel4">
+      <div class="g-panel-header">
+        <button class="g-panel-back" onclick="gBackToHub()">← Levels</button>
+        <span class="g-panel-emoji">⏱️</span>
+        <span class="g-panel-title">Beat the Clock</span>
+      </div>
+      <div id="l4Phase1">
+        <p style="text-align:center;font-size:0.85rem;color:var(--muted);margin-bottom:12px;">Read and memorise your affirmation — it will disappear!</p>
+        <div class="btc-flash" id="l4Flash"></div>
+        <div class="btc-countdown" id="l4Countdown"></div>
+        <p style="text-align:center;font-size:0.8rem;color:var(--dim);" id="l4PhaseMsg"></p>
+      </div>
+      <div id="l4Phase2" style="display:none">
+        <p style="text-align:center;font-size:0.85rem;color:var(--muted);margin-bottom:10px;">Now type it from memory!</p>
+        <div class="g-stats">
+          <div class="g-stat"><div class="g-stat-val" id="l4Time">0:00</div><div class="g-stat-label">Time</div></div>
+          <div class="g-stat"><div class="g-stat-val" id="l4Tries">0</div><div class="g-stat-label">Tries</div></div>
+        </div>
+        <textarea class="btc-input" id="l4Input" placeholder="Type your affirmation here..."></textarea>
+        <button class="btc-submit" onclick="l4Check()">Check my answer ✦</button>
+        <div class="btc-score" id="l4Feedback"></div>
+      </div>
+      <div class="g-win" id="l4Win">
+        <div style="font-size:2.2rem">🎉</div>
+        <h3>Level 4 Complete!</h3>
+        <div class="g-win-aff" id="l4WinAff"></div>
+        <div style="font-size:0.85rem;color:var(--muted);margin-bottom:16px" id="l4WinStats"></div>
+        <div class="g-win-btns">
+          <button class="g-win-btn" onclick="gOpenLevel(4)">↺ Play Again</button>
+          <button class="g-win-btn" onclick="gOpenLevel(5)">Level 5 → 🎯</button>
+          <button class="g-win-btn sec" onclick="gBackToHub()">All Levels</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Level 5: Word Balloons ── -->
+    <div class="g-game-panel" id="panel5">
+      <div class="g-panel-header">
+        <button class="g-panel-back" onclick="gBackToHub()">← Levels</button>
+        <span class="g-panel-emoji">🎯</span>
+        <span class="g-panel-title">Word Balloons</span>
+      </div>
+      <div class="g-stats">
+        <div class="g-stat"><div class="g-stat-val" id="l5Score">0</div><div class="g-stat-label">Tapped</div></div>
+        <div class="g-stat"><div class="g-stat-val" id="l5Errors">0</div><div class="g-stat-label">Errors</div></div>
+        <div class="g-stat"><div class="g-stat-val" id="l5Time">0:00</div><div class="g-stat-label">Time</div></div>
+      </div>
+      <div class="next-word-label">Tap this word next:</div>
+      <div class="next-word-display" id="l5NextWord"></div>
+      <div class="g-aff-display" style="margin-bottom:14px;"><p id="l5Progress"></p></div>
+      <div class="balloons-area" id="l5Area"></div>
+      <div class="balloon-hint">Tap the glowing gold balloon — it's the next word in your affirmation!</div>
+      <div class="g-win" id="l5Win">
+        <div style="font-size:2.2rem">🌟</div>
+        <h3>You mastered it!</h3>
+        <div class="g-win-aff" id="l5WinAff"></div>
+        <div style="font-size:0.85rem;color:var(--muted);margin-bottom:16px" id="l5WinStats"></div>
+        <div class="g-win-btns">
+          <button class="g-win-btn" onclick="gOpenLevel(5)">↺ Play Again</button>
+          <button class="g-win-btn sec" onclick="gBackToHub()">All Levels</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
