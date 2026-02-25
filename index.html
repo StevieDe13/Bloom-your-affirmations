@@ -939,13 +939,50 @@ async function doRepeat(text) {
     isSpeaking = false;
     document.getElementById('speakBtn').textContent = '🔊 Listen';
     document.getElementById('speakBtn').classList.remove('speaking');
+    repeatCount = 0;
+    repeatTotal = 0;
     return;
   }
   repeatCount++;
   document.getElementById('repeatCounter').textContent = `${repeatCount} / ${repeatTotal}`;
-  await speakText(text);
-  if (isSpeaking) {
-    setTimeout(() => doRepeat(text), 800);
+  
+  // Force speaking state to stay true between repeats
+  isSpeaking = true;
+  document.getElementById('speakBtn').textContent = '⏹ Stop';
+  document.getElementById('speakBtn').classList.add('speaking');
+
+  try {
+    const response = await fetch('/.netlify/functions/tts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text }),
+    });
+
+    if (!response.ok) throw new Error('Voice service error');
+    const data = await response.json();
+
+    const audioBytes = atob(data.audio);
+    const arrayBuffer = new ArrayBuffer(audioBytes.length);
+    const view = new Uint8Array(arrayBuffer);
+    for (let i = 0; i < audioBytes.length; i++) {
+      view[i] = audioBytes.charCodeAt(i);
+    }
+    const blob = new Blob([arrayBuffer], { type: 'audio/mpeg' });
+    const url = URL.createObjectURL(blob);
+    currentAudio = new Audio(url);
+
+    await new Promise((resolve) => {
+      currentAudio.onended = () => { URL.revokeObjectURL(url); currentAudio = null; resolve(); };
+      currentAudio.onerror = () => { URL.revokeObjectURL(url); currentAudio = null; resolve(); };
+      currentAudio.play();
+    });
+
+    // Small pause between repeats then continue if still active
+    if (isSpeaking) {
+      setTimeout(() => doRepeat(text), 800);
+    }
+  } catch(err) {
+    stopSpeaking();
   }
 }
 
