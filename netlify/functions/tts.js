@@ -25,13 +25,15 @@ exports.handler = async function(event) {
           input: { text },
           voice: {
             languageCode: 'en-AU',
-            name: 'en-AU-Neural2-A',
+            name: 'en-AU-Neural2-C',
             ssmlGender: 'FEMALE'
           },
           audioConfig: {
             audioEncoding: 'MP3',
-            speakingRate: 0.9,
-            pitch: 0
+            speakingRate: 0.82,
+            pitch: -1.5,
+            volumeGainDb: 1.0,
+            effectsProfileId: ['headphone-class-device']
           }
         })
       }
