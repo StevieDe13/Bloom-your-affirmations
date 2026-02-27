@@ -592,7 +592,13 @@
     <h1>Manifest Your Words</h1>
     <p class="tagline">The app that turns your dreams into daily affirmations —<br>speak them, believe them, live them.</p>
     <button class="how-btn" onclick="openModal()">? How affirmations work</button>
-    <button class="how-btn" onclick="openGame()" style="margin-left:8px; background:linear-gradient(135deg,rgba(251,191,36,0.15),rgba(244,114,182,0.15)); border-color:rgba(251,191,36,0.4); color:var(--gold);">🎮 Affirmation Games</button>
+    <div style="position:relative; display:inline-block; margin-left:8px;">
+      <button class="how-btn" onclick="openGame()" id="gamesBtn" style="background:linear-gradient(135deg,rgba(251,191,36,0.15),rgba(244,114,182,0.15)); border-color:rgba(251,191,36,0.4); color:var(--gold); opacity:0.4; cursor:not-allowed;">🎮 Affirmation Games</button>
+      <div id="gamesBtnPopup" style="display:none; position:absolute; top:calc(100% + 8px); left:50%; transform:translateX(-50%); background:var(--dark,#2d2640); color:white; font-size:0.75rem; font-weight:700; padding:8px 14px; border-radius:10px; white-space:nowrap; z-index:50; box-shadow:0 4px 16px rgba(0,0,0,0.3);">
+        💾 Save an affirmation first!
+        <div style="position:absolute; top:-5px; left:50%; transform:translateX(-50%); width:10px; height:10px; background:var(--dark,#2d2640); clip-path:polygon(50% 0%, 0% 100%, 100% 100%);"></div>
+      </div>
+    </div>
   </header>
 
   <div class="vision-card">
@@ -969,6 +975,17 @@ function clearAll() {
 function renderSaved() {
   const section = document.getElementById('savedSection');
   const list = document.getElementById('savedList');
+  const gamesBtn = document.getElementById('gamesBtn');
+
+  // Enable or disable games button based on saved affirmations
+  if (saved.length > 0) {
+    gamesBtn.style.opacity = '1';
+    gamesBtn.style.cursor = 'pointer';
+  } else {
+    gamesBtn.style.opacity = '0.4';
+    gamesBtn.style.cursor = 'not-allowed';
+  }
+
   if (!saved.length) { section.style.display = 'none'; return; }
   section.style.display = 'block';
   list.innerHTML = saved.map((s, i) => `
@@ -1142,6 +1159,12 @@ let gSeconds = 0;
 let gCompletedLevels = new Set();
 
 function openGame() {
+  if (!saved.length) {
+    const popup = document.getElementById('gamesBtnPopup');
+    popup.style.display = 'block';
+    setTimeout(() => { popup.style.display = 'none'; }, 2500);
+    return;
+  }
   gLoadSaved();
   document.getElementById('gameOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
