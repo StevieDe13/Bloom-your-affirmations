@@ -1008,7 +1008,7 @@ let repeatTotal = 0;
 
 // Fetches audio from Google TTS and returns a playable Audio object
 async function fetchAudio(text) {
-  const response = await fetch('/.netlify/functions/tts', {
+  const response = await fetch('/api/tts', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ text }),
