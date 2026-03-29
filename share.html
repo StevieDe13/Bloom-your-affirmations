@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bloom — Share Card</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    background: #0f0c1a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Nunito', sans-serif;
+    padding: 40px 20px;
+  }
+
+  .stars {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .star {
+    position: absolute;
+    border-radius: 50%;
+    background: white;
+    animation: twinkle var(--d, 3s) infinite var(--delay, 0s);
+    opacity: 0;
+  }
+  @keyframes twinkle { 0%,100%{opacity:0} 50%{opacity:var(--op,0.6)} }
+
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(90px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .orb-1 { width: 400px; height: 400px; background: rgba(139,92,246,0.2); top: -120px; right: -80px; }
+  .orb-2 { width: 350px; height: 350px; background: rgba(236,72,153,0.14); bottom: -80px; left: -60px; }
+
+  .card {
+    position: relative;
+    z-index: 1;
+    background: #1a1628;
+    border: 1px solid rgba(167,139,250,0.25);
+    border-radius: 28px;
+    padding: 52px 44px 48px;
+    max-width: 440px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 8px 64px rgba(0,0,0,0.6);
+    overflow: hidden;
+    animation: fadeUp 0.8s ease both;
+  }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:none} }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%; transform: translateX(-50%);
+    width: 240px; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(167,139,250,0.6), transparent);
+  }
+
+  .bloom-emoji {
+    font-size: 3.2rem;
+    display: block;
+    margin-bottom: 14px;
+    animation: float 4s ease-in-out infinite;
+  }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+
+  .badge {
+    display: inline-block;
+    background: linear-gradient(135deg, rgba(167,139,250,0.2), rgba(244,114,182,0.2));
+    border: 1px solid rgba(167,139,250,0.4);
+    border-radius: 100px;
+    padding: 5px 16px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #a78bfa;
+    margin-bottom: 16px;
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.6rem;
+    font-weight: 400;
+    line-height: 1.1;
+    background: linear-gradient(135deg, #e2d9f3 0%, #a78bfa 50%, #f472b6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 14px;
+  }
+
+  .tagline {
+    font-size: 0.92rem;
+    color: #9590aa;
+    line-height: 1.65;
+    margin-bottom: 10px;
+  }
+
+  .features {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 20px 0 28px;
+  }
+  .feature {
+    background: rgba(167,139,250,0.08);
+    border: 1px solid rgba(167,139,250,0.2);
+    border-radius: 100px;
+    padding: 5px 14px;
+    font-size: 0.75rem;
+    color: #c4b5fd;
+    font-weight: 600;
+  }
+
+  .cta {
+    display: inline-block;
+    padding: 15px 40px;
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: white;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    border-radius: 14px;
+    text-decoration: none;
+    box-shadow: 0 4px 28px rgba(124,58,237,0.5);
+    transition: all 0.25s ease;
+    letter-spacing: 0.01em;
+    margin-bottom: 18px;
+  }
+  .cta:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 36px rgba(124,58,237,0.65);
+  }
+
+  .url {
+    font-size: 0.72rem;
+    color: #5c5870;
+    letter-spacing: 0.03em;
+  }
+
+  .game-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 14px;
+    background: linear-gradient(135deg, rgba(251,191,36,0.12), rgba(244,114,182,0.12));
+    border: 1px solid rgba(251,191,36,0.3);
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-size: 0.75rem;
+    color: #fbbf24;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="card">
+  <span class="bloom-emoji">🌸</span>
+  <div class="badge">✦ Free App — No Sign Up</div>
+  <h1>Bloom</h1>
+  <p class="tagline">Turn your dreams into daily affirmations.<br>Speak them, believe them, live them.</p>
+
+  <div class="features">
+    <span class="feature">✦ AI Affirmations</span>
+    <span class="feature">🔊 Listen Mode</span>
+    <span class="feature">🎮 Affirmation Games</span>
+  </div>
+
+  <a class="cta" href="https://bloom-your-affirmations.vercel.app" target="_blank">
+    ✦ Try Bloom Free
+  </a>
+
+  <div class="game-pill">🎮 5 games to train your mindset</div>
+
+  <p class="url" style="margin-top: 20px;">bloom-your-affirmations.vercel.app</p>
+</div>
+
+<script>
+const container = document.getElementById('stars');
+for (let i = 0; i < 80; i++) {
+  const s = document.createElement('div');
+  s.className = 'star';
+  const size = Math.random() * 2 + 0.5;
+  s.style.cssText = `width:${size}px;height:${size}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--d:${2+Math.random()*4}s;--delay:${Math.random()*5}s;--op:${0.3+Math.random()*0.7};`;
+  container.appendChild(s);
+}
+</script>
+</body>
+</html>
